@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <title>LocalHub 지도 테스트</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 16px; }
+        #map { width: 100%; height: 70vh; border-radius: 12px; }
+        .toolbar { display:flex; gap:8px; margin:12px 0; }
+        input[type=text]{ flex:1; padding:8px 12px; border:1px solid #ddd; border-radius:8px; }
+        button{ padding:8px 12px; border:1px solid #ddd; border-radius:8px; cursor:pointer; }
+    </style>
+
+    <!-- ✅ autoload=true로 SDK 자동 로드 + services 포함 -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=2712836d7bac17a909d719b0a0ce036d&libraries=services"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<h2>LocalHub 지도 테스트 (주소 검색 + 마커 표시)</h2>
+
+<div class="toolbar">
+    <input id="addr" type="text" placeholder="주소나 장소를 입력 (예: 서울 강남구 역삼동 / 강남역 카페)"/>
+    <button onclick="searchAddress()">주소 검색</button>
+    <button onclick="keywordSearch()">키워드 검색</button>
+    <button onclick="loadPlaces()">우리 DB 마커 불러오기</button>
+</div>
+
+<div id="map"></div>
+
+<script>
+    let map, geocoder, places;
+    const markers = [];
+
+    function clearMarkers(){
+        markers.forEach(m => m.setMap(null));
+        markers.length = 0;
+    }
+
+    function addMarker(lat, lng, title){
+        const pos = new kakao.maps.LatLng(lat, lng);
+        const marker = new kakao.maps.Marker({ position: pos, title, map });
+        markers.push(marker);
+        return marker;
+    }
+
+    function fitToMarkers(){
+        if (markers.length === 0) return;
+        const bounds = new kakao.maps.LatLngBounds();
+        markers.forEach(m => bounds.extend(m.getPosition()));
+        map.setBounds(bounds);
+    }
+
+    // 1️⃣ 주소 검색
+    async function searchAddress(){
+        const q = document.getElementById('addr').value.trim();
+        if(!q) return alert('검색어를 입력해줘');
+        clearMarkers();
+
+        geocoder.addressSearch(q, function(result, status){
+            if (status !== kakao.maps.services.Status.OK) {
+                alert('결과 없음');
+                return;
+            }
+            result.slice(0,5).forEach(r => {
+                const lat = parseFloat(r.y), lng = parseFloat(r.x);
+                const marker = addMarker(lat, lng, r.address_name);
+                const iw = new kakao.maps.InfoWindow({
+                    content: `<div style="padding:6px 10px;"><b>${r.address_name}</b><br/>(${lat.toFixed(6)}, ${lng.toFixed(6)})</div>`
+                });
+                kakao.maps.event.addListener(marker, 'click', () => iw.open(map, marker));
+            });
+            fitToMarkers();
+        });
+    }
+
+    // 2️⃣ 키워드 검색
+    async function keywordSearch(){
+        const q = document.getElementById('addr').value.trim();
+        if(!q) return alert('키워드를 입력해줘');
+        clearMarkers();
+
+        places.keywordSearch(q, function(data, status){
+            if (status !== kakao.maps.services.Status.OK) {
+                alert('결과 없음');
+                return;
+            }
+            data.slice(0,15).forEach(p => {
+                const lat = parseFloat(p.y), lng = parseFloat(p.x);
+                const marker = addMarker(lat, lng, p.place_name);
+                const iw = new kakao.maps.InfoWindow({
+                    content: `<div style="padding:6px 10px; max-width:260px;">
+                      <div style="font-weight:700">${p.place_name}</div>
+                      <div style="color:#666; font-size:12px">${p.road_address_name || p.address_name || ''}</div>
+                      <a href="${p.place_url}" target="_blank" style="font-size:12px">상세보기</a>
+                      </div>`
+                });
+                kakao.maps.event.addListener(marker, 'click', () => iw.open(map, marker));
+            });
+            fitToMarkers();
+        }, { useMapBounds: false });
+    }
+
+    // 3️⃣ DB 마커 표시
+    async function loadPlaces(){
+        clearMarkers();
+        try{
+            const res = await axios.get('http://localhost:8080/api/places?page=0&size=100');
+            const list = res.data.content || res.data || [];
+            list.forEach(p => {
+                if (p.lat == null || p.lng == null) return;
+                const marker = addMarker(p.lat, p.lng, p.name);
+                const iw = new kakao.maps.InfoWindow({
+                    content: `<div style="padding:6px 10px; max-width:260px;">
+                      <div style="font-weight:700">${p.name}</div>
+                      <div style="color:#666; font-size:12px">${p.address ?? ''}</div>
+                      <div style="font-size:12px">${p.category ?? ''}</div>
+                      </div>`
+                });
+                kakao.maps.event.addListener(marker, 'click', () => iw.open(map, marker));
+            });
+            fitToMarkers();
+        }catch(e){
+            console.error(e);
+            alert('우리 API 호출 실패 (/api/places)');
+        }
+    }
+
+    // ✅ 지도 초기화 (autoload=true니까 바로 실행 가능)
+    window.onload = function(){
+        console.log("✅ Kakao SDK Loaded:", typeof kakao);
+        const center = new kakao.maps.LatLng(37.4979, 127.0276);
+        map = new kakao.maps.Map(document.getElementById('map'), { center, level: 4 });
+        geocoder = new kakao.maps.services.Geocoder();
+        places = new kakao.maps.services.Places();
+    }
+</script>
+</body>
+</html>
+
