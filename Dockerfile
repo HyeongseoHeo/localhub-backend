@@ -1,29 +1,20 @@
-# 1단계: Gradle로 빌드
-FROM gradle:7.6.2-jdk17 AS builder
+# 1. Gradle 빌드 스테이지
+FROM gradle:8.5-jdk17-alpine AS builder
 WORKDIR /app
 
-# Gradle 캐시 활용을 위해 먼저 빌드 파일만 복사
-COPY build.gradle settings.gradle ./
-COPY gradle gradle
-
-# 의존성만 먼저 다운로드
-RUN gradle dependencies --no-daemon || true
-
-# 전체 프로젝트 복사
 COPY . .
+RUN ./gradlew clean bootJar --no-daemon
 
-# jar 빌드
-RUN gradle clean bootJar --no-daemon
+# 2. 런타임 스테이지
+FROM eclipse-temurin:17-jdk-alpine
 
-# 2단계: JDK 17 이미지에서 실행
-FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
-# 빌드 산출물 복사
+# 빌드된 jar 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# 컨테이너 포트
+# 포트 오픈
 EXPOSE 8080
 
-# 실행 명령
+# 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
