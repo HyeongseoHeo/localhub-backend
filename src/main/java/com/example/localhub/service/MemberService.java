@@ -60,6 +60,14 @@ public class MemberService {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
     }
+
+    //회원 탈퇴
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+
+        memberRepository.delete(member);
+    }
 }
 
 

@@ -64,6 +64,22 @@ public class MemberController {
 
         return res;
     }
+
+    //멤버 탈퇴
+    @DeleteMapping("/delete")
+    public Map<String, String> delete(HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new RuntimeException("로그인 상태가 아닙니다.");
+        }
+
+        memberService.deleteMember(memberId);
+        session.invalidate();
+
+        Map<String, String> res = new HashMap<>();
+        res.put("message", "회원 탈퇴 완료");
+        return res;
+    }
 }
 
 
