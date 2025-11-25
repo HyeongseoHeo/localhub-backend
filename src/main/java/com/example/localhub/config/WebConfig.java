@@ -14,12 +14,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5173",
                         "https://jere-trispermous-festively.ngrok-free.dev",
                         "https://*.ngrok-free.dev",
-                        "https://*.vercel.app",
-                        "https://localhub-backend-ljtr.onrender.com"
+                        "https://*.vercel.app"
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }
+
 
