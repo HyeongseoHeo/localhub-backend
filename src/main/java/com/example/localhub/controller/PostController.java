@@ -36,9 +36,9 @@ public class PostController {
 
     @PostMapping
     public PostResponse create(
-            @RequestBody PostRequest request,
-            @RequestParam Long memberId
+            @RequestBody PostRequest request
     ) {
+        Long memberId = 1L;
         return postService.createPost(request, memberId);
     }
 
