@@ -34,6 +34,7 @@ public class MemberController {
 
         Map<String, Object> result = new HashMap<>();
         result.put("message", "로그인 성공");
+        result.put("memberId", member.getId());
         result.put("email", member.getEmail());
         result.put("nickname", member.getNickname());
         result.put("role", member.getRole());

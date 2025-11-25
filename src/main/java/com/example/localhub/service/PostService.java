@@ -29,7 +29,7 @@ public class PostService {
                 .map(this::toResponse);
     }
 
-    // ⭐ 지역 기반 목록 조회 추가
+    // 지역 기반 목록 조회
     public Page<PostResponse> getPostsByRegion(String region, Pageable pageable) {
         return postRepository.findByRegionAndAdFalse(region, pageable)
                 .map(this::toResponse);
