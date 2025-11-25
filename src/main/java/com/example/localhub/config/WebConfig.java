@@ -13,11 +13,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:5173",
                         "https://jere-trispermous-festively.ngrok-free.dev",
-                        "https://*.ngrok-free.dev",
-                        "https://*.vercel.app"
+                        "*.ngrok-free.dev",
+                        "*.vercel.app"
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }
+
