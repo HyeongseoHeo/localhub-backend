@@ -36,9 +36,9 @@ public class PostController {
 
     @PostMapping
     public PostResponse create(
-            @RequestBody PostRequest request
+            @RequestBody PostRequest request,
+            @RequestParam Long memberId
     ) {
-        Long memberId = 1L;
         return postService.createPost(request, memberId);
     }
 
@@ -55,6 +55,16 @@ public class PostController {
     public void delete(@PathVariable Long id,
                        @RequestParam Long memberId) {
         postService.deletePost(id, memberId);
+    }
+
+    @PostMapping("/{id}/like")
+    public void like(@PathVariable Long id, @RequestParam Long memberId) {
+        postService.likePost(id, memberId);
+    }
+
+    @DeleteMapping("/{id}/like")
+    public void unlike(@PathVariable Long id, @RequestParam Long memberId) {
+        postService.unlikePost(id, memberId);
     }
 
     @GetMapping("/recommended")

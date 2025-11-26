@@ -8,10 +8,15 @@ import com.example.localhub.dto.board.RecommendedPostResponse;
 import com.example.localhub.repository.CommentRepository;
 import com.example.localhub.repository.MemberRepository;
 import com.example.localhub.repository.PostRepository;
+import com.example.localhub.domain.board.PostLike;
+import com.example.localhub.repository.PostLikeRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+
 
 import java.util.List;
 
@@ -22,6 +27,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
+
 
     // 전체 목록
     public Page<PostResponse> getPosts(Pageable pageable) {
@@ -88,6 +95,48 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    // 좋아요 기능
+    public void likePost(Long postId, Long memberId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        // 이미 좋아요 눌렀는지 체크
+        if (postLikeRepository.existsByPostAndMember(post, member)) {
+            throw new RuntimeException("이미 좋아요를 눌렀습니다.");
+        }
+
+        PostLike like = new PostLike();
+        like.setPost(post);
+        like.setMember(member);
+        postLikeRepository.save(like);
+
+        // 게시글 좋아요 수 증가
+        post.setLikesCount(post.getLikesCount() + 1);
+        postRepository.save(post);
+    }
+
+    // 좋아요 취소
+    public void unlikePost(Long postId, Long memberId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+
+        if (!postLikeRepository.existsByPostAndMember(post, member)) {
+            throw new RuntimeException("좋아요를 누르지 않은 상태입니다.");
+        }
+
+        postLikeRepository.deleteByPostAndMember(post, member);
+
+        // 게시글 좋아요 수 감소
+        post.setLikesCount(post.getLikesCount() - 1);
+        postRepository.save(post);
     }
 
     // 추천
