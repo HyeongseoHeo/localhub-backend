@@ -68,9 +68,9 @@ public class Post {
 
     // 태그
     @ElementCollection
-    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @CollectionTable(name = "post_keywords", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "tag")
-    private List<String> tags = new ArrayList<>();
+    private List<String> keywords = new ArrayList<>();
 
 
     @PrePersist

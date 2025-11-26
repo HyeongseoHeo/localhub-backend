@@ -63,7 +63,7 @@ public class PostService {
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
         post.setAd(request.isAd());
-        post.setTags(request.getTags());
+        post.setKeywords(request.getKeywords());
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -81,7 +81,7 @@ public class PostService {
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
         post.setAd(request.isAd());
-        post.setTags(request.getTags());
+        post.setKeywords(request.getKeywords());
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -166,7 +166,7 @@ public class PostService {
         dto.setRatingCount(post.getRatingCount());
         dto.setTotalRatingScore(post.getTotalRatingScore());
         dto.setAd(post.isAd());
-        dto.setTags(post.getTags());
+        dto.setKeywords(post.getKeywords());
 
         return dto;
     }
