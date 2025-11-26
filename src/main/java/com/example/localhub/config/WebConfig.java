@@ -10,16 +10,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns(
-                        "http://localhost:5173",
-                        "https://jere-trispermous-festively.ngrok-free.dev",
-                        "https://*.ngrok-free.dev",
-                        "https://*.vercel.app"
+                .allowedOrigins(
+                        "http://localhost:5173",                    // 프론트 로컬 개발용
+                        "https://jere-trispermous-festively.ngrok-free.dev", // 테스트용 ngrok
+                        "https://opensource09.vercel.app"           // 배포된 프론트
                 )
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }
+
 
 
