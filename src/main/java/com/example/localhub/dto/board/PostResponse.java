@@ -29,7 +29,7 @@ public class PostResponse {
     private int totalRatingScore;// 별점 총합
 
     private boolean ad;          // 광고 여부
-    private List<String> keywords;
+    private List<String> keywords; // 태그
 }
 
 
