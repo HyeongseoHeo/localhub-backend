@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "posts")
@@ -63,6 +65,13 @@ public class Post {
     // 광고 여부
     @Column(name = "is_ad", nullable = false)
     private boolean ad = false;
+
+    // 태그
+    @ElementCollection
+    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
+
 
     @PrePersist
     public void onCreate() {

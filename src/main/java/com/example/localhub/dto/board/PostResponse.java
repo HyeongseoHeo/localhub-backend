@@ -2,6 +2,7 @@ package com.example.localhub.dto.board;
 
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +28,7 @@ public class PostResponse {
     private int totalRatingScore;// 별점 총합
 
     private boolean ad;          // 광고 여부
+    private List<String> tags;
 }
 
 

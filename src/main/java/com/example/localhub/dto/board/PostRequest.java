@@ -2,6 +2,7 @@ package com.example.localhub.dto.board;
 
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,6 +16,9 @@ public class PostRequest {
 
     // 광고 여부
     private boolean ad;
+
+    // 태그
+    private List<String> tags;
 }
 
 
