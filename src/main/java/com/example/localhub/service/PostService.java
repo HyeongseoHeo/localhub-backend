@@ -16,8 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
-
 import java.util.List;
 
 @Service
@@ -159,6 +157,7 @@ public class PostService {
         dto.setRegion(post.getRegion());
         dto.setContent(post.getContent());
         dto.setTimestamp(post.getCreatedAt());
+        dto.setUpdatedAt(post.getUpdatedAt());
         dto.setViews(post.getViews());
         dto.setLikesCount(post.getLikesCount());
         dto.setCommentsCount(post.getCommentsCount());

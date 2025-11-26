@@ -18,6 +18,7 @@ public class PostResponse {
 
     private String content;      // 게시글 내용
     private LocalDateTime timestamp; // created_at
+    private LocalDateTime updatedAt;
 
     private int views;           // 조회수
     private int likesCount;      // 좋아요 수

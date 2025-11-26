@@ -69,14 +69,14 @@ public class Post {
     // 태그
     @ElementCollection
     @CollectionTable(name = "post_keywords", joinColumns = @JoinColumn(name = "post_id"))
-    @Column(name = "tag")
+    @Column(name = "keyword")
     private List<String> keywords = new ArrayList<>();
 
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = null; // 처음에는 수정 시간 없음
+        this.updatedAt = this.createdAt; // 처음에는 수정 시간 없음
     }
 
     @PreUpdate
