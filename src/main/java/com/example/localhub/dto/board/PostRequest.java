@@ -18,7 +18,7 @@ public class PostRequest {
     private boolean ad;
 
     // 태그
-    private List<String> keywords;
+    private List<String> tags;
 }
 
 
