@@ -43,14 +43,26 @@ public class PostService {
 
 
      // 상세 조회
-    public PostResponse getPost(Long id) {
+    public PostResponse getPost(Long id, Long memberId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
 
-        return toResponse(post);
+        PostResponse dto = toResponse(post);
+
+        //로그인 안했으면 false 고정
+        if (memberId == null) {
+            dto.setLiked(false);
+            return dto;
+        }
+
+        // 로그인 했으면 좋아요 여부 검사
+        boolean liked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+        dto.setLiked(liked);
+
+        return dto;
     }
 
      // 게시글 생성
@@ -181,6 +193,7 @@ public class PostService {
         dto.setViews(post.getViews());
         dto.setLikesCount(post.getLikesCount());
         dto.setCommentsCount(post.getCommentsCount());
+        dto.setLiked(false);
         dto.setRating(post.getRating());
         dto.setRatingCount(post.getRatingCount());
         dto.setTotalRatingScore(post.getTotalRatingScore());

@@ -36,8 +36,11 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public PostResponse detail(@PathVariable Long id) {
-        return postService.getPost(id);
+    public PostResponse detail(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long memberId
+    ) {
+        return postService.getPost(id, memberId);
     }
 
     @PostMapping

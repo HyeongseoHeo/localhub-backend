@@ -22,6 +22,7 @@ public class PostResponse {
 
     private int views;           // 조회수
     private int likesCount;      // 좋아요 수
+    private boolean liked;       // 좋아요 눌렀는지 여부
     private long commentsCount;  // 댓글 수
 
     private double rating;       // 평균 별점 (계산값)
@@ -30,7 +31,7 @@ public class PostResponse {
 
     private boolean ad;          // 광고 여부
     private List<String> tags;   // 태그
-    private List<String> images;
+    private List<String> images; // 이미지
 }
 
 
