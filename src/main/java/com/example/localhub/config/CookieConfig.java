@@ -12,13 +12,13 @@ public class CookieConfig {
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> sessionCookieCustomizer() {
         return factory -> factory.addContextCustomizers(context -> {
 
-            // 세션 쿠키 도메인 Render로 강제 설정
-            context.setSessionCookieDomain(".onrender.com");
+            // Render 백엔드 도메인을 정확하게 설정해야 한다
+            context.setSessionCookieDomain("localhub-backend-ljtr.onrender.com");
 
-            // 모든 경로에서 유효하게
             context.setSessionCookiePath("/");
         });
     }
 
 }
+
 
