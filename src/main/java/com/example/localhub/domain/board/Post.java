@@ -50,7 +50,7 @@ public class Post {
     @Column(name = "likes_count", nullable = false)
     private int likesCount = 0;
 
-    // 댓글 수 (캐싱용)
+    // 댓글 수
     @Column(name = "comments_count", nullable = false)
     private int commentsCount = 0;
 
@@ -72,11 +72,16 @@ public class Post {
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
+    // 이미지 URL 리스트
+    @ElementCollection
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "image_url")
+    private List<String> images = new ArrayList<>();
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt; // 처음에는 수정 시간 없음
+        this.updatedAt = this.createdAt;
     }
 
     @PreUpdate

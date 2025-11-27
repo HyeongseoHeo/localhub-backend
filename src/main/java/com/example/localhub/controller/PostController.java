@@ -35,20 +35,16 @@ public class PostController {
     }
 
     @PostMapping
-    public PostResponse create(
-            @RequestBody PostRequest request,
-            @RequestParam Long memberId
-    ) {
-        return postService.createPost(request, memberId);
+    public PostResponse create(@RequestBody PostRequest request) {
+        return postService.createPost(request, request.getMemberId());
     }
 
     @PutMapping("/{id}")
     public PostResponse update(
             @PathVariable Long id,
-            @RequestBody PostRequest request,
-            @RequestParam Long memberId
+            @RequestBody PostRequest request
     ) {
-        return postService.updatePost(id, request, memberId);
+        return postService.updatePost(id, request, request.getMemberId());
     }
 
     @DeleteMapping("/{id}")

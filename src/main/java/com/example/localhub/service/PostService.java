@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -27,20 +28,21 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
 
-
-    // 전체 목록
-    public Page<PostResponse> getPosts(Pageable pageable) {
+    // 전체 목록 조회
+         public Page<PostResponse> getPosts(Pageable pageable) {
         return postRepository.findAllByAdFalse(pageable)
                 .map(this::toResponse);
     }
 
-    // 지역 기반 목록 조회
+
+     // 지역 기반 목록 조회
     public Page<PostResponse> getPostsByRegion(String region, Pageable pageable) {
         return postRepository.findByRegionAndAdFalse(region, pageable)
                 .map(this::toResponse);
     }
 
-    // 상세 조회
+
+     // 상세 조회
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
@@ -51,8 +53,14 @@ public class PostService {
         return toResponse(post);
     }
 
-    // 생성
-    public PostResponse createPost(PostRequest request, Long memberId) {
+     // 게시글 생성
+    public PostResponse createPost(PostRequest request) {
+
+        Long memberId = request.getMemberId();
+        if (memberId == null) {
+            throw new RuntimeException("memberId가 요청에 없습니다.");
+        }
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
@@ -60,15 +68,24 @@ public class PostService {
         post.setAuthor(member);
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
-        post.setAd(request.isAd());
-        post.setTags(request.getTags());
+
+        post.setAd(Boolean.TRUE.equals(request.getAd()));
+
+        post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
+        post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
     }
+     // 게시글 수정
 
-    // 수정
-    public PostResponse updatePost(Long postId, PostRequest request, Long memberId) {
+    public PostResponse updatePost(Long postId, PostRequest request) {
+
+        Long memberId = request.getMemberId();
+        if (memberId == null) {
+            throw new RuntimeException("memberId가 요청에 없습니다.");
+        }
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
@@ -78,8 +95,10 @@ public class PostService {
 
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
-        post.setAd(request.isAd());
-        post.setTags(request.getTags());
+        post.setAd(Boolean.TRUE.equals(request.getAd()));
+
+        post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
+        post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -97,7 +116,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    // 좋아요 기능
+    // 좋아요
     public void likePost(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
@@ -105,7 +124,6 @@ public class PostService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
-        // 이미 좋아요 눌렀는지 체크
         if (postLikeRepository.existsByPostAndMember(post, member)) {
             throw new RuntimeException("이미 좋아요를 눌렀습니다.");
         }
@@ -115,7 +133,6 @@ public class PostService {
         like.setMember(member);
         postLikeRepository.save(like);
 
-        // 게시글 좋아요 수 증가
         post.setLikesCount(post.getLikesCount() + 1);
         postRepository.save(post);
     }
@@ -134,12 +151,11 @@ public class PostService {
 
         postLikeRepository.deleteByPostAndMember(post, member);
 
-        // 게시글 좋아요 수 감소
         post.setLikesCount(post.getLikesCount() - 1);
         postRepository.save(post);
     }
 
-    // 추천
+    // 추천 게시글 조회
     public List<RecommendedPostResponse> getRecommended() {
         return postRepository.findTop5ByAdFalseOrderByViewsDescLikesCountDesc()
                 .stream()
@@ -147,7 +163,7 @@ public class PostService {
                 .toList();
     }
 
-    // DTO 변환
+   // DTO 변환
     private PostResponse toResponse(Post post) {
         PostResponse dto = new PostResponse();
 
@@ -166,6 +182,7 @@ public class PostService {
         dto.setTotalRatingScore(post.getTotalRatingScore());
         dto.setAd(post.isAd());
         dto.setTags(post.getTags());
+        dto.setImages(post.getImages());
 
         return dto;
     }
@@ -181,6 +198,7 @@ public class PostService {
         return dto;
     }
 }
+
 
 
 
