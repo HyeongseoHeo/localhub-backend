@@ -36,7 +36,7 @@ public class PostController {
 
     @PostMapping
     public PostResponse create(@RequestBody PostRequest request) {
-        return postService.createPost(request, request.getMemberId());
+        return postService.createPost(request);
     }
 
     @PutMapping("/{id}")
@@ -44,7 +44,7 @@ public class PostController {
             @PathVariable Long id,
             @RequestBody PostRequest request
     ) {
-        return postService.updatePost(id, request, request.getMemberId());
+        return postService.updatePost(id, request);
     }
 
     @DeleteMapping("/{id}")
