@@ -30,14 +30,14 @@ public class PostService {
 
     // 전체 목록 조회
          public Page<PostResponse> getPosts(Pageable pageable) {
-        return postRepository.findAllByAdFalse(pageable)
+        return postRepository.findAll(pageable)
                 .map(this::toResponse);
     }
 
 
      // 지역 기반 목록 조회
     public Page<PostResponse> getPostsByRegion(String region, Pageable pageable) {
-        return postRepository.findByRegionAndAdFalse(region, pageable)
+        return postRepository.findByRegion(region, pageable)
                 .map(this::toResponse);
     }
 
@@ -77,8 +77,7 @@ public class PostService {
         Post saved = postRepository.save(post);
         return toResponse(saved);
     }
-     // 게시글 수정
-
+    // 게시글 수정
     public PostResponse updatePost(Long postId, PostRequest request) {
 
         Long memberId = request.getMemberId();
@@ -153,6 +152,11 @@ public class PostService {
 
         post.setLikesCount(post.getLikesCount() - 1);
         postRepository.save(post);
+    }
+
+    public Page<PostResponse> getPostsByTags(List<String> tags, Pageable pageable) {
+        return postRepository.findDistinctByTagsIn(tags, pageable)
+                .map(this::toResponse);
     }
 
     // 추천 게시글 조회

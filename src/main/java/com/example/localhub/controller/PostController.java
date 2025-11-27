@@ -21,8 +21,14 @@ public class PostController {
     @GetMapping
     public Page<PostResponse> list(
             @RequestParam(required = false) String region,
+            @RequestParam(required = false) String tags,
             Pageable pageable
     ) {
+        if (tags != null && !tags.isBlank()) {
+            List<String> tagList = List.of(tags.split(","));
+            return postService.getPostsByTags(tagList, pageable);
+        }
+
         if (region != null && !region.isBlank()) {
             return postService.getPostsByRegion(region, pageable);
         }
