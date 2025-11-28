@@ -194,7 +194,6 @@ public class PostService {
         dto.setViews(post.getViews());
         dto.setLikesCount(post.getLikesCount());
         dto.setCommentsCount(post.getCommentsCount());
-        dto.setLiked(false);
         dto.setRating(post.getRating());
         dto.setRatingCount(post.getRatingCount());
         dto.setTotalRatingScore(post.getTotalRatingScore());
