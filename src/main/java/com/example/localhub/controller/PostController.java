@@ -4,6 +4,9 @@ import com.example.localhub.dto.board.PostRequest;
 import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.board.RecommendedPostResponse;
 import com.example.localhub.service.PostService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,9 +42,33 @@ public class PostController {
     @GetMapping("/{id}")
     public PostResponse detail(
             @PathVariable Long id,
-            @RequestParam(required = false) Long memberId
+            @RequestParam(required = false) Long memberId,
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        return postService.getPost(id, memberId);
+        String cookieName = "postView_" + id;
+        boolean shouldIncreaseView = true;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(cookieName)) {
+                    shouldIncreaseView = false; // 쿠키가 있으면 조회수 증가 X
+                    break;
+                }
+            }
+        }
+
+        PostResponse postResponse = postService.getPost(id, memberId, shouldIncreaseView);
+
+        if (shouldIncreaseView) {
+            Cookie newCookie = new Cookie(cookieName, "true");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24); // 24시간
+            response.addCookie(newCookie);
+        }
+
+        return postResponse;
     }
 
     @PostMapping
@@ -71,11 +98,6 @@ public class PostController {
     @DeleteMapping("/{id}/like")
     public void unlike(@PathVariable Long id, @RequestParam Long memberId) {
         postService.unlikePost(id, memberId);
-    }
-
-    @PostMapping("/{id}/view")
-    public void incrementView(@PathVariable Long id) {
-        postService.incrementView(id);
     }
 
     @GetMapping("/recommended")

@@ -77,9 +77,14 @@ public class PostService {
 
 
      // 상세 조회
-    public PostResponse getPost(Long id, Long memberId) {
+    public PostResponse getPost(Long id, Long memberId, boolean shouldIncreaseView) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        if (shouldIncreaseView) {
+            post.setViews(post.getViews() + 1);
+            postRepository.save(post);
+        }
 
         PostResponse dto = toResponse(post);
 
@@ -158,15 +163,6 @@ public class PostService {
 
         postRepository.delete(post);
     }
-
-    public void incrementView(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-
-        post.setViews(post.getViews() + 1);
-        postRepository.save(post);
-    }
-
 
     // 좋아요
     public void likePost(Long postId, Long memberId) {
