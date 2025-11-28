@@ -73,6 +73,11 @@ public class PostController {
         postService.unlikePost(id, memberId);
     }
 
+    @PostMapping("/{id}/view")
+    public void incrementView(@PathVariable Long id) {
+        postService.incrementView(id);
+    }
+
     @GetMapping("/recommended")
     public List<RecommendedPostResponse> recommended() {
         return postService.getRecommended();

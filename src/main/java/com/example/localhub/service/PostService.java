@@ -27,7 +27,6 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
-    private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
 
     // 전체 목록 조회
@@ -97,13 +96,6 @@ public class PostService {
         return dto;
     }
 
-    // 조회수 증가 API 전용
-    public void incrementView(Long id) {
-        postRepository.findById(id).ifPresent(post -> {
-            post.setViews(post.getViews() + 1);
-            postRepository.save(post);
-        });
-    }
 
      // 게시글 생성
     public PostResponse createPost(PostRequest request) {
@@ -167,6 +159,15 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    public void incrementView(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        post.setViews(post.getViews() + 1);
+        postRepository.save(post);
+    }
+
+
     // 좋아요
     public void likePost(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
@@ -204,11 +205,6 @@ public class PostService {
 
         post.setLikesCount(post.getLikesCount() - 1);
         postRepository.save(post);
-    }
-
-    public Page<PostResponse> getPostsByTags(List<String> tags, Pageable pageable) {
-        return postRepository.findDistinctByTagsIn(tags, pageable)
-                .map(this::toResponse);
     }
 
     // 추천 게시글 조회
