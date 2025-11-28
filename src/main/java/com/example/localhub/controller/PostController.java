@@ -22,17 +22,18 @@ public class PostController {
     public Page<PostResponse> list(
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String tags,
+            @RequestParam(required = false) Long memberId,
             Pageable pageable
     ) {
         if (tags != null && !tags.isBlank()) {
             List<String> tagList = List.of(tags.split(","));
-            return postService.getPostsByTags(tagList, pageable);
+            return postService.getPostsByTags(tagList, pageable, memberId);
         }
 
         if (region != null && !region.isBlank()) {
-            return postService.getPostsByRegion(region, pageable);
+            return postService.getPostsByRegion(region, pageable, memberId);
         }
-        return postService.getPosts(pageable);
+        return postService.getPosts(pageable, memberId);
     }
 
     @GetMapping("/{id}")

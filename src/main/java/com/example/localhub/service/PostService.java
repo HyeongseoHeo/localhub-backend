@@ -15,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostService {
 
     private final PostRepository postRepository;
@@ -29,16 +31,49 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
 
     // 전체 목록 조회
-         public Page<PostResponse> getPosts(Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPosts(Pageable pageable, Long memberId) {
         return postRepository.findAll(pageable)
-                .map(this::toResponse);
+                .map(post -> {
+                    // 1. 엔티티 -> DTO 변환
+                    PostResponse dto = toResponse(post);
+
+                    // 2. 로그인한 유저라면 좋아요 여부 확인해서 DTO에 세팅
+                    if (memberId != null) {
+                        boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                        dto.setLiked(isLiked);
+                    }
+                    return dto;
+                });
     }
 
 
      // 지역 기반 목록 조회
-    public Page<PostResponse> getPostsByRegion(String region, Pageable pageable) {
-        return postRepository.findByRegion(region, pageable)
-                .map(this::toResponse);
+     @Transactional(readOnly = true)
+     public Page<PostResponse> getPostsByRegion(String region, Pageable pageable, Long memberId) {
+         return postRepository.findByRegion(region, pageable)
+                 .map(post -> {
+                     PostResponse dto = toResponse(post);
+
+                     if (memberId != null) {
+                         boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                         dto.setLiked(isLiked);
+                     }
+                     return dto;
+                 });
+     }
+
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPostsByTags(List<String> tags, Pageable pageable, Long memberId) {
+        return postRepository.findDistinctByTagsIn(tags, pageable)
+                .map(post -> {
+                    PostResponse dto = toResponse(post);
+                    if (memberId != null) {
+                        boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                        dto.setLiked(isLiked);
+                    }
+                    return dto;
+                });
     }
 
 
