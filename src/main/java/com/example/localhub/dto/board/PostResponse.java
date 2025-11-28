@@ -15,8 +15,9 @@ public class PostResponse {
     private String region;       // 지역 코드
     private String author;       // 작성자 닉네임
     private String authorId;     // 작성자 ID
+    private String role;         // 작성자의 역할
 
-    private String content;      // 게시글 내용
+    private String content;          // 게시글 내용
     private LocalDateTime timestamp; // created_at
     private LocalDateTime updatedAt;
 

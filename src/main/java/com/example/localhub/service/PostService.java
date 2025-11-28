@@ -186,6 +186,7 @@ public class PostService {
         dto.setId(post.getId());
         dto.setAuthor(post.getAuthor().getNickname());
         dto.setAuthorId(post.getAuthor().getId().toString());
+        dto.setRole(post.getAuthor().getRole().name());
         dto.setRegion(post.getRegion());
         dto.setContent(post.getContent());
         dto.setTimestamp(post.getCreatedAt());
