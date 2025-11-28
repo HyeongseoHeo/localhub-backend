@@ -82,9 +82,6 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        post.setViews(post.getViews() + 1);
-        postRepository.save(post);
-
         PostResponse dto = toResponse(post);
 
         //로그인 안했으면 false 고정
@@ -98,6 +95,14 @@ public class PostService {
         dto.setLiked(liked);
 
         return dto;
+    }
+
+    // 조회수 증가 API 전용
+    public void incrementView(Long id) {
+        postRepository.findById(id).ifPresent(post -> {
+            post.setViews(post.getViews() + 1);
+            postRepository.save(post);
+        });
     }
 
      // 게시글 생성
