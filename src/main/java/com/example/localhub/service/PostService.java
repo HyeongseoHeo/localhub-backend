@@ -10,6 +10,8 @@ import com.example.localhub.repository.MemberRepository;
 import com.example.localhub.repository.PostRepository;
 import com.example.localhub.domain.board.PostLike;
 import com.example.localhub.repository.PostLikeRepository;
+import com.example.localhub.domain.board.PostRating;
+import com.example.localhub.repository.PostRatingRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
+    private final PostRatingRepository postRatingRepository;
 
     // 전체 목록 조회
     @Transactional(readOnly = true)
@@ -156,6 +159,7 @@ public class PostService {
         post.setLatitude(request.getLatitude());
         post.setLongitude(request.getLongitude());
 
+
         Post saved = postRepository.save(post);
         return toResponse(saved);
     }
@@ -170,6 +174,36 @@ public class PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    // 별점 등록/수정 메서드
+    public void ratePost(Long postId, Long memberId, int score) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글 없음"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        // 1. 이미 별점을 줬는지 확인
+        PostRating rating = postRatingRepository.findByPostAndMember(post, member)
+                .orElse(new PostRating()); // 없으면 새로 만듦
+
+        // 2. 점수 업데이트 전, 기존 점수가 있다면 총점에서 빼주기 (수정일 경우)
+        if (rating.getId() != null) {
+            post.setTotalRatingScore(post.getTotalRatingScore() - rating.getScore());
+        } else {
+            // 처음 주는 거라면 참여자 수 +1
+            post.setRatingCount(post.getRatingCount() + 1);
+        }
+
+        // 3. 새 점수 세팅 및 저장
+        rating.setPost(post);
+        rating.setMember(member);
+        rating.setScore(score);
+        postRatingRepository.save(rating);
+
+        // 4. 게시글 총점 업데이트
+        post.setTotalRatingScore(post.getTotalRatingScore() + score);
+        postRepository.save(post);
     }
 
     // 좋아요

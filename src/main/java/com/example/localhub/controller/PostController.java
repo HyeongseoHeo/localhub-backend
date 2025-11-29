@@ -104,5 +104,13 @@ public class PostController {
     public List<RecommendedPostResponse> recommended() {
         return postService.getRecommended();
     }
+
+    // 별점 주기 API
+    @PostMapping("/{id}/rate")
+    public void ratePost(@PathVariable Long id,
+                         @RequestParam Long memberId,
+                         @RequestParam int score) {
+        postService.ratePost(id, memberId, score);
+    }
 }
 

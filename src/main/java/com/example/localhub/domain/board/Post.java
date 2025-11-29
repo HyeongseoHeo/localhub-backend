@@ -89,6 +89,9 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PostLike> likes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostRating> ratings = new ArrayList<>();
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
