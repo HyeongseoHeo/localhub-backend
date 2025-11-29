@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class CommentRequest {
     private String content;
+    private Long memberId;
+    private Boolean anonymous;
 }
 
 

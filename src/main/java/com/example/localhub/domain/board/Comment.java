@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class Comment {
 
@@ -41,5 +40,10 @@ public class Comment {
     public void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+    // 익명 여부
+    @Column(nullable = false)
+    private boolean anonymous = false;
+
 }
 
