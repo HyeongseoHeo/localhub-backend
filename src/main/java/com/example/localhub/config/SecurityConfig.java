@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.localhub.security.JwtAuthenticationFilter;
+import com.example.localhub.security.JwtTokenProvider;
 
 
 @Configuration
@@ -21,6 +24,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,22 +35,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CORS 설정 (ConfigurationSource 주입 방식)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-
                 .csrf(csrf -> csrf.disable())
-
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+                // 1. 요청 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
-                        // 회원가입, 로그인, 공개 게시글 조회는 모두 허용
                         .requestMatchers("/api/members/signup", "/api/members/login",
                                 "/api/posts/**", "/api/comments/**").permitAll()
-
                         .anyRequest().authenticated()
-                );
+                )
 
-        // TODO: JWT 토큰 검증 필터를 Custom으로 추가해야 함
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class
+                        // NOTE: 기존의 UsernamePasswordAuthenticationFilter.class를 사용하면 됩니다.
+                );
 
         return http.build();
     }
