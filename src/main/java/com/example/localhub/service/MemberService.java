@@ -68,6 +68,15 @@ public class MemberService {
 
         memberRepository.delete(member);
     }
+
+    public void toggleCleanbot(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+
+        // Member 엔티티에 만들어둔 메서드 호출
+        member.toggleCleanbot();
+        memberRepository.save(member);
+    }
 }
 
 

@@ -39,6 +39,7 @@ public class MemberController {
         result.put("nickname", member.getNickname());
         result.put("role", member.getRole());
         result.put("isBusiness", member.isManager());
+        result.put("cleanbotOn", member.isCleanbotOn());
 
         return result;
     }
@@ -79,6 +80,16 @@ public class MemberController {
 
         Map<String, String> res = new HashMap<>();
         res.put("message", "회원 탈퇴 완료");
+        return res;
+    }
+
+    // 클린봇 설정 변경
+    @PutMapping("/{id}/cleanbot")
+    public Map<String, String> toggleCleanbot(@PathVariable Long id) {
+        memberService.toggleCleanbot(id);
+
+        Map<String, String> res = new HashMap<>();
+        res.put("message", "클린봇 설정이 변경되었습니다.");
         return res;
     }
 }
