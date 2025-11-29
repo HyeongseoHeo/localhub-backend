@@ -123,6 +123,10 @@ public class PostService {
         post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
         post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
 
+        post.setAddress(request.getAddress());
+        post.setLatitude(request.getLatitude());
+        post.setLongitude(request.getLongitude());
+
         Post saved = postRepository.save(post);
         return toResponse(saved);
     }
@@ -147,6 +151,10 @@ public class PostService {
 
         post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
         post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
+
+        post.setAddress(request.getAddress());
+        post.setLatitude(request.getLatitude());
+        post.setLongitude(request.getLongitude());
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -232,6 +240,9 @@ public class PostService {
         dto.setAd(post.isAd());
         dto.setTags(post.getTags());
         dto.setImages(post.getImages());
+        dto.setAddress(post.getAddress());
+        dto.setLatitude(post.getLatitude());
+        dto.setLongitude(post.getLongitude());
 
         return dto;
     }

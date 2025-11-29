@@ -72,6 +72,10 @@ public class Post {
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
+    private String address;    // 주소 (예: 충북 청주시...)
+    private Double latitude;   // 위도 (y좌표)
+    private Double longitude;
+
     // 이미지 URL 리스트
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
