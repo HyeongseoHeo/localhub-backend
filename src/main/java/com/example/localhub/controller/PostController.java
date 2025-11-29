@@ -106,7 +106,7 @@ public class PostController {
     }
 
     // 별점 주기 API
-    @PostMapping("/{id}/rate")
+    @PostMapping("/{id}/rating")
     public void ratePost(@PathVariable Long id,
                          @RequestParam Long memberId,
                          @RequestParam int score) {

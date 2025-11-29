@@ -5,12 +5,14 @@ import com.example.localhub.domain.member.Role;
 import com.example.localhub.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final String PASSWORD_REGEX =
             "^(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$*])[a-zA-Z0-9!@#$*]{8,49}$";
@@ -28,13 +30,15 @@ public class MemberService {
             throw new RuntimeException("비밀번호 형식이 올바르지 않습니다. (소문자/숫자/특수문자 포함, 8~49자)");
         }
 
+        String encodedPassword = passwordEncoder.encode(password);
+
         // 이메일 도메인으로 관계자 여부 판단
         boolean managerFlag = email.endsWith("@chungbuk.ac.kr");
         Role role = managerFlag ? Role.BUSINESS : Role.USER;
 
         Member member = Member.builder()
                 .email(email)
-                .password(password)  // TODO: 나중에 BCrypt로 암호화
+                .password(encodedPassword)
                 .nickname(nickname)
                 .role(role)
                 .manager(managerFlag)
@@ -48,7 +52,7 @@ public class MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
 
-        if (!member.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, member.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
