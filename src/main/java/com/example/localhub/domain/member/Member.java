@@ -29,6 +29,15 @@ public class Member {
 
     @Column(nullable = false)
     private boolean manager;   // true = 사업자, false = 일반유저
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean cleanbotOn = true; // 클린봇 기능 사용 여부
+
+    public void toggleCleanbot() {
+        this.cleanbotOn = !this.cleanbotOn; // 설정 껐다 켰다 할 편의 메서드
+    }
+
 }
 
 

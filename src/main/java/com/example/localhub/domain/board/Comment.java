@@ -32,6 +32,9 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(nullable = false)
+    private boolean malicious = false;
+
     private LocalDateTime createdAt;
 
     @PrePersist

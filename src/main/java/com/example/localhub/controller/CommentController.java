@@ -16,8 +16,11 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public List<CommentResponse> list(@PathVariable Long postId) {
-        return commentService.getComments(postId);
+    public List<CommentResponse> list(
+            @PathVariable Long postId,
+            @RequestParam(required = false) Long memberId
+    ) {
+        return commentService.getComments(postId, memberId);
     }
 
     @PostMapping
