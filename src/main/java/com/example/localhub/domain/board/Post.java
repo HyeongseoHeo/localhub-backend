@@ -72,6 +72,7 @@ public class Post {
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
+    // 지도 정보
     private String address;    // 주소 (예: 충북 청주시...)
     private Double latitude;   // 위도 (y좌표)
     private Double longitude;
@@ -81,6 +82,12 @@ public class Post {
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PostLike> likes = new ArrayList<>();
 
     @PrePersist
     public void onCreate() {
