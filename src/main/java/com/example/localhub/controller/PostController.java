@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.example.localhub.security.details.MemberDetailsService;
 
 import java.util.List;
 
@@ -86,17 +88,20 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id,
-                       @RequestParam Long memberId) {
+                       @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        Long memberId = memberDetails.getMember().getId();
         postService.deletePost(id, memberId);
     }
 
     @PostMapping("/{id}/like")
-    public void like(@PathVariable Long id, @RequestParam Long memberId) {
+    public void like(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        Long memberId = memberDetails.getMember().getId();
         postService.likePost(id, memberId);
     }
 
     @DeleteMapping("/{id}/like")
-    public void unlike(@PathVariable Long id, @RequestParam Long memberId) {
+    public void unlike(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        Long memberId = memberDetails.getMember().getId();
         postService.unlikePost(id, memberId);
     }
 

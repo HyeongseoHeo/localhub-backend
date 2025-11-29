@@ -24,7 +24,7 @@ public class CommentService {
     private final MemberRepository memberRepository;
     private final CleanbotService cleanbotService;
 
-    // 댓글 목록 조회 (수정됨: 보는 사람 ID 추가)
+    // 댓글 목록 조회
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId, Long viewerId) {
 
@@ -73,6 +73,10 @@ public class CommentService {
         comment.setAnonymous(Boolean.TRUE.equals(request.getAnonymous()));
 
         Comment saved = commentRepository.save(comment);
+        // 게시글의 댓글 수 증가
+        post.setCommentsCount(post.getCommentsCount() + 1);
+        postRepository.save(post);
+
         return toResponse(saved);
     }
 
@@ -85,7 +89,13 @@ public class CommentService {
             throw new RuntimeException("삭제 권한 없음");
         }
 
+        Post post = comment.getPost();
         commentRepository.delete(comment);
+
+        // 게시글의 댓글 수 감소
+        post.setCommentsCount(post.getCommentsCount() - 1);
+        postRepository.save(post);
+
     }
 
     private CommentResponse toResponse(Comment comment) {
