@@ -4,8 +4,13 @@ import com.example.localhub.domain.member.Member;
 import com.example.localhub.dto.member.MemberLoginRequest;
 import com.example.localhub.dto.member.MemberSignupRequest;
 import com.example.localhub.service.MemberService;
+import com.example.localhub.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,6 +22,8 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
 
     // 회원가입
     @PostMapping("/signup")
@@ -26,11 +33,20 @@ public class MemberController {
 
     // 로그인
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody MemberLoginRequest req, HttpSession session) {
-        Member member = memberService.login(req.getEmail(), req.getPassword());
+    public Map<String, Object> login(@RequestBody MemberLoginRequest req) {
 
-        // 세션에 회원 id 저장
-        session.setAttribute("memberId", member.getId());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                req.getEmail(), req.getPassword()
+        );
+
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwtToken = jwtTokenProvider.createToken(authentication);
+
+        // NOTE: 이메일로 회원 정보를 다시 조회하는 메서드가 MemberService에 필요합니다.
+        Member member = memberService.getMemberByEmail(req.getEmail());
 
         Map<String, Object> result = new HashMap<>();
         result.put("message", "로그인 성공");
@@ -40,43 +56,44 @@ public class MemberController {
         result.put("role", member.getRole());
         result.put("isBusiness", member.isManager());
         result.put("cleanbotOn", member.isCleanbotOn());
+        result.put("token", jwtToken);
 
         return result;
     }
 
     // 로그인된 사용자 정보 조회
     @GetMapping("/me")
-    public Object me(HttpSession session) {
-        Long id = (Long) session.getAttribute("memberId");
-        if (id == null) {
+    public Object me() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || "anonymousUser".equals(authentication.getName())) {
             Map<String, Object> res = new HashMap<>();
             res.put("error", "로그인 상태가 아닙니다.");
             return res;
         }
+
+        Long id = Long.parseLong(authentication.getName());
         return memberService.getMember(id);
     }
 
     //로그아웃
     @PostMapping("/logout")
-    public Map<String, String> logout(HttpSession session) {
-        session.invalidate();
-
+    public Map<String, String> logout() {
         Map<String, String> res = new HashMap<>();
         res.put("message", "로그아웃 성공");
-
+        // 클라이언트에게 토큰 삭제를 위임
         return res;
     }
 
     //멤버 탈퇴
     @DeleteMapping("/delete")
-    public Map<String, String> delete(HttpSession session) {
-        Long memberId = (Long) session.getAttribute("memberId");
-        if (memberId == null) {
+    public Map<String, String> delete() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || "anonymousUser".equals(authentication.getName())) {
             throw new RuntimeException("로그인 상태가 아닙니다.");
         }
+        Long memberId = Long.parseLong(authentication.getName());
 
         memberService.deleteMember(memberId);
-        session.invalidate();
 
         Map<String, String> res = new HashMap<>();
         res.put("message", "회원 탈퇴 완료");

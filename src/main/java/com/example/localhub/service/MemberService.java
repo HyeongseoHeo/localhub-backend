@@ -6,6 +6,7 @@ import com.example.localhub.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class MemberService {
             "^(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$*])[a-zA-Z0-9!@#$*]{8,49}$";
 
     // 회원가입
+    @Transactional
     public Member signup(String email, String password, String nickname) {
 
         // 이메일 중복 체크
@@ -48,6 +50,7 @@ public class MemberService {
     }
 
     // 로그인
+    @Transactional(readOnly = true)
     public Member login(String email, String password) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 이메일입니다."));
@@ -60,12 +63,20 @@ public class MemberService {
     }
 
     // 회원 조회
+    @Transactional(readOnly = true)
     public Member getMember(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+    }
+
     //회원 탈퇴
+    @Transactional
     public void deleteMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
@@ -73,6 +84,8 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
+    // 클릿봇 토글
+    @Transactional
     public void toggleCleanbot(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
