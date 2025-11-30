@@ -27,9 +27,11 @@ public class PostController {
     public Page<PostResponse> list(
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String tags,
-            @RequestParam(required = false) Long memberId,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
         if (tags != null && !tags.isBlank()) {
             List<String> tagList = List.of(tags.split(","));
             return postService.getPostsByTags(tagList, pageable, memberId);
@@ -44,10 +46,12 @@ public class PostController {
     @GetMapping("/{id}")
     public PostResponse detail(
             @PathVariable Long id,
-            @RequestParam(required = false) Long memberId,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
         String cookieName = "postView_" + id;
         boolean shouldIncreaseView = true;
 
