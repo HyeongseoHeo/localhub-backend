@@ -40,6 +40,7 @@ public class SecurityConfig {
 
                 // 1. 요청 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/index.html", "/static/**","/api/members/signup",
                                 "/api/members/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/comments/**").permitAll()
@@ -50,11 +51,9 @@ public class SecurityConfig {
                         new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class
                 );
-
         return http.build();
     }
 
-    // 이 빈은 다른 곳에서 주입받아 사용됩니다.
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
