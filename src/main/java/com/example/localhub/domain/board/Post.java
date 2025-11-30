@@ -50,9 +50,9 @@ public class Post {
     @Column(name = "likes_count", nullable = false)
     private int likes = 0;
 
-    // [수정] 평균 별점 (DB에 저장할 필드 추가)
+    // 평균 별점 (DB에 저장할 필드 추가)
     @Column(name = "average_rating")
-    private double averageRating = 0.0;
+    private Double averageRating = 0.0;
 
     // 별점 총합
     @Column(name = "total_rating_score", nullable = false)

@@ -107,12 +107,7 @@ public class PostService {
 
 
      // 게시글 생성
-    public PostResponse createPost(PostRequest request) {
-
-        Long memberId = request.getMemberId();
-        if (memberId == null) {
-            throw new RuntimeException("memberId가 요청에 없습니다.");
-        }
+    public PostResponse createPost(PostRequest request, Long memberId) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
@@ -134,13 +129,9 @@ public class PostService {
         Post saved = postRepository.save(post);
         return toResponse(saved);
     }
-    // 게시글 수정
-    public PostResponse updatePost(Long postId, PostRequest request) {
 
-        Long memberId = request.getMemberId();
-        if (memberId == null) {
-            throw new RuntimeException("memberId가 요청에 없습니다.");
-        }
+    // 게시글 수정
+    public PostResponse updatePost(Long postId, PostRequest request, Long memberId) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
@@ -209,15 +200,14 @@ public class PostService {
 
     // 좋아요
     public void likePost(Long postId, Long memberId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
-
-        if (postLikeRepository.existsByPostAndMember(post, member)) {
+        if (postLikeRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new RuntimeException("이미 좋아요를 눌렀습니다.");
         }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
         PostLike like = new PostLike();
         like.setPost(post);
@@ -225,7 +215,6 @@ public class PostService {
         postLikeRepository.save(like);
 
         post.setLikes(post.getLikes() + 1);
-        postRepository.save(post);
     }
 
     // 좋아요 취소
@@ -233,17 +222,12 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+        PostLike postLike = postLikeRepository.findByPostIdAndMemberId(postId, memberId)
+                .orElseThrow(() -> new RuntimeException("좋아요를 누르지 않았습니다."));
 
-        if (!postLikeRepository.existsByPostAndMember(post, member)) {
-            throw new RuntimeException("좋아요를 누르지 않은 상태입니다.");
-        }
-
-        postLikeRepository.deleteByPostAndMember(post, member);
+        postLikeRepository.delete(postLike);
 
         post.setLikes(post.getLikes() - 1);
-        postRepository.save(post);
     }
 
     // 추천 게시글 조회
