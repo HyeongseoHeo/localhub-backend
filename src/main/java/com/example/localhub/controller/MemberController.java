@@ -65,14 +65,23 @@ public class MemberController {
     @GetMapping("/me")
     public Object me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication == null || "anonymousUser".equals(authentication.getName())) {
-            Map<String, Object> res = new HashMap<>();
-            res.put("error", "로그인 상태가 아닙니다.");
-            return res;
+            return null;
         }
 
         Long id = Long.parseLong(authentication.getName());
-        return memberService.getMember(id);
+        Member member = memberService.getMember(id);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", member.getId());
+        result.put("email", member.getEmail());
+        result.put("nickname", member.getNickname());
+        result.put("role", member.getRole());
+        result.put("manager", member.isManager());       // isManager() 메서드 확인 필요
+        result.put("cleanbotOn", member.isCleanbotOn()); // isCleanbotOn() 확인 필요
+
+        return result;
     }
 
     //로그아웃
