@@ -175,14 +175,12 @@ public class PostService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
-        // 1. 이미 별점을 줬는지 확인
         PostRating rating = postRatingRepository.findByPostIdAndMemberId(postId, memberId)
                 .orElse(null); // 없으면 새로 만듦
 
         if (rating != null) {
             rating.updateScore(score);
         } else {
-            // 2-2. 없으면 새로 생성 (Builder 사용)
             rating = PostRating.builder()
                     .post(post)
                     .member(member)
@@ -191,11 +189,10 @@ public class PostService {
             postRatingRepository.save(rating);
         }
 
-        // 3. 새 점수 세팅 및 저장
         Double average = postRatingRepository.getAverageScoreByPostId(postId);
 
-        // 4. 게시글 총점 업데이트
         post.updateAverageRating(average != null ? average : 0.0);
+        postRepository.save(post);
     }
 
     // 좋아요
@@ -215,6 +212,7 @@ public class PostService {
         postLikeRepository.save(like);
 
         post.setLikes(post.getLikes() + 1);
+        postRepository.save(post);
     }
 
     // 좋아요 취소
@@ -228,6 +226,7 @@ public class PostService {
         postLikeRepository.delete(postLike);
 
         post.setLikes(post.getLikes() - 1);
+        postRepository.save(post);
     }
 
     // 추천 게시글 조회
