@@ -10,7 +10,9 @@ import com.example.localhub.repository.MemberRepository;
 import com.example.localhub.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 트랜잭션 추가
+import org.springframework.transaction.annotation.Transactional;
+import com.example.localhub.repository.CommentLikeRepository;
+import com.example.localhub.domain.board.CommentLike;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final CleanbotService cleanbotService;
+    private final CommentLikeRepository commentLikeRepository;
 
     // 댓글 목록 조회
     @Transactional(readOnly = true)
@@ -96,6 +99,41 @@ public class CommentService {
         post.setCommentsCount(post.getCommentsCount() - 1);
         postRepository.save(post);
 
+    }
+
+    public void likeComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글 없음"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        // 이미 좋아요 눌렀는지 확인
+        if (commentLikeRepository.existsByCommentAndMember(comment, member)) {
+            throw new RuntimeException("이미 좋아요를 눌렀습니다.");
+        }
+
+        // 좋아요 저장
+        CommentLike like = new CommentLike();
+        like.setComment(comment);
+        like.setMember(member);
+        commentLikeRepository.save(like);
+    }
+
+    public void unlikeComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("댓글 없음"));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        // 좋아요가 있는지 확인 (없으면 에러 또는 무시)
+        if (!commentLikeRepository.existsByCommentAndMember(comment, member)) {
+            throw new RuntimeException("좋아요를 누르지 않은 상태입니다.");
+        }
+
+        // 삭제 실행
+        commentLikeRepository.deleteByCommentAndMember(comment, member);
+
+        comment.setLikesCount(comment.getLikesCount() - 1);
     }
 
     private CommentResponse toResponse(Comment comment) {

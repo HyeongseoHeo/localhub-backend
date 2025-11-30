@@ -45,5 +45,8 @@ public class Comment {
     @Column(nullable = false)
     private boolean anonymous = false;
 
+    @Column(nullable = false)
+    private int likesCount = 0;
+
 }
 
