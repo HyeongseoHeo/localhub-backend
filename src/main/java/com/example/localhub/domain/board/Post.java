@@ -46,6 +46,10 @@ public class Post {
     @Column(nullable = false)
     private int views = 0;
 
+    //댓글 수
+    @Column(name = "comments_count", nullable = false, columnDefinition = "integer default 0")
+    private int commentsCount = 0;
+
     // [수정] 좋아요 수 (Service와 이름 통일: likesCount -> likes)
     @Column(name = "likes_count", nullable = false)
     private int likes = 0;
