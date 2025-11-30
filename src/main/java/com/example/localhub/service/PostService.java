@@ -253,12 +253,12 @@ public class PostService {
         dto.setViews(post.getViews());
         dto.setLikesCount(post.getLikes());
         dto.setCommentsCount(post.getComments()!= null ? post.getComments().size() : 0);
-        dto.setRating(post.getAverageRating());
+        dto.setRating(post.getAverageRating() != null ? post.getAverageRating() : 0.0);
         dto.setRatingCount(post.getRatingCount());
         dto.setTotalRatingScore(post.getTotalRatingScore());
         dto.setAd(post.isAd());
-        dto.setTags(post.getTags());
-        dto.setImages(post.getImages());
+        dto.setTags(post.getTags() != null ? post.getTags() : Collections.emptyList());
+        dto.setImages(post.getImages() != null ? post.getImages() : Collections.emptyList());
         dto.setAddress(post.getAddress());
         dto.setLatitude(post.getLatitude());
         dto.setLongitude(post.getLongitude());
