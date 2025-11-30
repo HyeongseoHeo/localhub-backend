@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "posts")
@@ -26,7 +26,7 @@ public class Post {
     @JoinColumn(name = "author_id", nullable = false)
     private Member author;
 
-    // 지역 코드 (예: "SEOUL", "BUSAN")
+    // 지역 코드
     @Column(nullable = false, length = 10)
     private String region;
 
@@ -46,13 +46,13 @@ public class Post {
     @Column(nullable = false)
     private int views = 0;
 
-    // 좋아요 수
+    // [수정] 좋아요 수 (Service와 이름 통일: likesCount -> likes)
     @Column(name = "likes_count", nullable = false)
-    private int likesCount = 0;
+    private int likes = 0;
 
-    // 댓글 수
-    @Column(name = "comments_count", nullable = false)
-    private int commentsCount = 0;
+    // [수정] 평균 별점 (DB에 저장할 필드 추가)
+    @Column(name = "average_rating")
+    private double averageRating = 0.0;
 
     // 별점 총합
     @Column(name = "total_rating_score", nullable = false)
@@ -73,8 +73,8 @@ public class Post {
     private List<String> tags = new ArrayList<>();
 
     // 지도 정보
-    private String address;    // 주소 (예: 충북 청주시...)
-    private Double latitude;   // 위도 (y좌표)
+    private String address;
+    private Double latitude;
     private Double longitude;
 
     // 이미지 URL 리스트
@@ -83,14 +83,19 @@ public class Post {
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
 
+    // --- 연관 관계 매핑 ---
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    // [수정] 이름 충돌 방지 (int likes와 겹치므로 리스트는 postLikes로 변경)
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<PostLike> likes = new ArrayList<>();
+    private List<PostLike> postLikes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PostRating> ratings = new ArrayList<>();
+
+    // --- 이벤트 및 편의 메서드 ---
 
     @PrePersist
     public void onCreate() {
@@ -103,10 +108,10 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // 별점 평균 계산 (필드가 아니라 계산값)
-    @Transient
-    public double getRating() {
-        return ratingCount == 0 ? 0.0 : (double) totalRatingScore / ratingCount;
+    // [추가] 평균 별점 업데이트 메서드 (Service에서 호출)
+    public void updateAverageRating(double averageRating) {
+        // 소수점 한 자리까지 반올림 (예: 4.666 -> 4.7)
+        this.averageRating = Math.round(averageRating * 10.0) / 10.0;
     }
 }
 

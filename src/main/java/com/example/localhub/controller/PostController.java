@@ -117,8 +117,13 @@ public class PostController {
     // 별점 주기 API
     @PostMapping("/{id}/rating")
     public void ratePost(@PathVariable Long id,
-                         @RequestParam Long memberId,
-                         @RequestParam int score) {
+                         @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+                         @RequestParam int score
+    ) {
+        if (memberDetails == null) {
+            throw new RuntimeException("로그인이 필요한 기능입니다.");
+        }
+        Long memberId = memberDetails.getMember().getId();
         postService.ratePost(id, memberId, score);
     }
 }

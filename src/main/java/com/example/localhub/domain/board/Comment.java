@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -35,6 +37,9 @@ public class Comment {
     private boolean malicious = false;
 
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private int likes = 0;
 
     @PrePersist
     public void onCreate() {

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -179,31 +180,31 @@ public class PostService {
     // 별점 등록/수정 메서드
     public void ratePost(Long postId, Long memberId, int score) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글 없음"));
+                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
         // 1. 이미 별점을 줬는지 확인
-        PostRating rating = postRatingRepository.findByPostAndMember(post, member)
-                .orElse(new PostRating()); // 없으면 새로 만듦
+        PostRating rating = postRatingRepository.findByPostIdAndMemberId(postId, memberId)
+                .orElse(null); // 없으면 새로 만듦
 
-        // 2. 점수 업데이트 전, 기존 점수가 있다면 총점에서 빼주기 (수정일 경우)
-        if (rating.getId() != null) {
-            post.setTotalRatingScore(post.getTotalRatingScore() - rating.getScore());
+        if (rating != null) {
+            rating.updateScore(score);
         } else {
-            // 처음 주는 거라면 참여자 수 +1
-            post.setRatingCount(post.getRatingCount() + 1);
+            // 2-2. 없으면 새로 생성 (Builder 사용)
+            rating = PostRating.builder()
+                    .post(post)
+                    .member(member)
+                    .score(score)
+                    .build();
+            postRatingRepository.save(rating);
         }
 
         // 3. 새 점수 세팅 및 저장
-        rating.setPost(post);
-        rating.setMember(member);
-        rating.setScore(score);
-        postRatingRepository.save(rating);
+        Double average = postRatingRepository.getAverageScoreByPostId(postId);
 
         // 4. 게시글 총점 업데이트
-        post.setTotalRatingScore(post.getTotalRatingScore() + score);
-        postRepository.save(post);
+        post.updateAverageRating(average != null ? average : 0.0);
     }
 
     // 좋아요
@@ -223,7 +224,7 @@ public class PostService {
         like.setMember(member);
         postLikeRepository.save(like);
 
-        post.setLikesCount(post.getLikesCount() + 1);
+        post.setLikes(post.getLikes() + 1);
         postRepository.save(post);
     }
 
@@ -241,7 +242,7 @@ public class PostService {
 
         postLikeRepository.deleteByPostAndMember(post, member);
 
-        post.setLikesCount(post.getLikesCount() - 1);
+        post.setLikes(post.getLikes() - 1);
         postRepository.save(post);
     }
 
@@ -266,9 +267,9 @@ public class PostService {
         dto.setTimestamp(post.getCreatedAt());
         dto.setUpdatedAt(post.getUpdatedAt());
         dto.setViews(post.getViews());
-        dto.setLikesCount(post.getLikesCount());
-        dto.setCommentsCount(post.getCommentsCount());
-        dto.setRating(post.getRating());
+        dto.setLikesCount(post.getLikes());
+        dto.setCommentsCount(post.getComments()!= null ? post.getComments().size() : 0);
+        dto.setRating(post.getAverageRating());
         dto.setRatingCount(post.getRatingCount());
         dto.setTotalRatingScore(post.getTotalRatingScore());
         dto.setAd(post.isAd());
