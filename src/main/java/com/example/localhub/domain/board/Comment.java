@@ -38,7 +38,7 @@ public class Comment {
 
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "integer default 0")
     private int likes = 0;
 
     @PrePersist

@@ -248,7 +248,7 @@ public class PostService {
 
     // 추천 게시글 조회
     public List<RecommendedPostResponse> getRecommended() {
-        return postRepository.findTop5ByAdFalseOrderByViewsDescLikesCountDesc()
+        return postRepository.findTop5ByAdFalseOrderByViewsDescLikesDesc()
                 .stream()
                 .map(this::toRecommended)
                 .toList();
