@@ -4,6 +4,7 @@ import com.example.localhub.security.JwtAuthenticationFilter;
 import com.example.localhub.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,7 +41,8 @@ public class SecurityConfig {
                 // 1. 요청 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/index.html", "/static/**","/api/members/signup",
-                                "/api/members/login","/api/posts/**", "/api/comments/**").permitAll()
+                                "/api/members/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/comments/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
