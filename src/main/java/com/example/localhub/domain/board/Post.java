@@ -92,7 +92,7 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    // [수정] 이름 충돌 방지 (int likes와 겹치므로 리스트는 postLikes로 변경)
+    // 이름 충돌 방지
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<PostLike> postLikes = new ArrayList<>();
 

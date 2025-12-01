@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -31,13 +29,13 @@ public class CleanbotService {
     @Value("${cleanbot.enabled:true}")
     private boolean isEnabled;
 
-    /**
-     * 텍스트가 악성(욕설 등)인지 판별하는 메서드
-     * @param content 검사할 내용
-     * @return true(악성), false(정상)
-     */
+    private static final List<String> BAD_WORDS = Arrays.asList(
+            "지랄", "시발", "씨발", "병신", "개새끼", "니애미", "좆", "존나", "미친","지1랄",
+            "지.랄", "시1발", "시.발", "병1신", "병.신", "fuck", "tlqkf", "Tlqkf", "wlfkf", "ㅗ",
+            "븅신", "븅", "꺼져", "꺼1져", "꺼.져", "껒", "껒져"
+    );
+
     public boolean isMalicious(String content) {
-        // 1. 스위치가 꺼져있으면 무조건 정상(false) 처리
         if (!isEnabled) {
             return false;
         }
@@ -49,7 +47,7 @@ public class CleanbotService {
         try {
             String url = API_URL + apiKey;
 
-            // 2. 요청 Body 만들기
+            // 요청 Body 만들기
             Map<String, Object> body = new HashMap<>();
             Map<String, String> comment = new HashMap<>();
             comment.put("text", content);
@@ -60,15 +58,15 @@ public class CleanbotService {
             attributes.put("TOXICITY", new HashMap<>());
             body.put("requestedAttributes", attributes);
 
-            // 3. 헤더 설정
+            // 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-            // 4. API 호출
+            // API 호출
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
-            // 5. 점수 분석 (0.0 ~ 1.0)
+            // 점수 분석 (0.0 ~ 1.0)
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && responseBody.containsKey("attributeScores")) {
                 Map<String, Object> attributeScores = (Map<String, Object>) responseBody.get("attributeScores");
