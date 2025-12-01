@@ -27,6 +27,11 @@ public class MemberService {
             throw new RuntimeException("중복된 이메일입니다.");
         }
 
+        // 닉네임 중복 체크
+        if (memberRepository.findByNickname(nickname).isPresent()) {
+            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+        }
+
         // 비밀번호 조건 체크
         if (!password.matches(PASSWORD_REGEX)) {
             throw new RuntimeException("비밀번호 형식이 올바르지 않습니다. (소문자/숫자/특수문자 포함, 8~49자)");

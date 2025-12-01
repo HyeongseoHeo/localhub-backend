@@ -27,7 +27,7 @@ public class Member {
     @Column(nullable = false)
     private String password;  // BCrypt 암호화
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
