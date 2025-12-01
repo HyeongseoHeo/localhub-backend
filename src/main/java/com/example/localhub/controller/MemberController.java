@@ -1,19 +1,30 @@
 package com.example.localhub.controller;
 
 import com.example.localhub.domain.member.Member;
+import com.example.localhub.domain.member.TravelNote;
+import com.example.localhub.dto.board.PostResponse;
+import com.example.localhub.dto.comment.CommentResponse;
 import com.example.localhub.dto.member.MemberLoginRequest;
 import com.example.localhub.dto.member.MemberSignupRequest;
+import com.example.localhub.security.details.MemberDetailsService;
+import com.example.localhub.service.CommentService;
 import com.example.localhub.service.MemberService;
 import com.example.localhub.security.JwtTokenProvider;
+import com.example.localhub.service.PostService;
+import com.example.localhub.service.TravelNoteService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +35,9 @@ public class MemberController {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final PostService postService;
+    private final CommentService commentService;
+    private final TravelNoteService travelNoteService;
 
     // 회원가입
     @PostMapping("/signup")
@@ -117,6 +131,66 @@ public class MemberController {
         Map<String, String> res = new HashMap<>();
         res.put("message", "클린봇 설정이 변경되었습니다.");
         return res;
+    }
+
+    // 쓴 글 목록
+    @GetMapping("/me/posts")
+    public Page<PostResponse> getMyPosts(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long memberId = memberDetails.getMember().getId();
+        return postService.getMyPosts(memberId, pageable);
+    }
+
+    // 작성한 댓글
+    @GetMapping("/me/comments")
+    public Page<CommentResponse> getMyComments(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails, Pageable pageable) {
+        return commentService.getMyComments(memberDetails.getMember().getId(), pageable);
+    }
+
+    // 여행 기록 조회
+    @GetMapping("/me/travel-notes")
+    public List<TravelNote> getMyNotes(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        return travelNoteService.getMyNotes(memberDetails.getMember().getId());
+    }
+
+    // 여행 기록 작성
+    @PostMapping("/me/travel-notes")
+    public void createNote(
+            @RequestBody Map<String, String> body, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        travelNoteService.createNote(memberDetails.getMember().getId(), body.get("content"));
+    }
+
+    // 좋아요 한 글 목록
+    @GetMapping("/me/likes")
+    public Page<PostResponse> getMyLikedPosts(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long memberId = memberDetails.getMember().getId();
+        return postService.getMyLikedPosts(memberId, pageable);
+    }
+
+    @GetMapping("/me/bookmarks")
+    public Page<PostResponse> getMyBookmarkedPosts(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long memberId = memberDetails.getMember().getId();
+        return postService.getMyBookmarkedPosts(memberId, pageable);
+    }
+
+    // 사용자가 가장 자주 방문한 지역 조회
+    @GetMapping("/{memberId}/top-region")
+    public Map<String, String> getTopRegion(@PathVariable Long memberId) {
+        String topRegion = postService.getTopRegion(memberId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("region", topRegion);
+        return response;
     }
 }
 

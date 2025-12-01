@@ -11,6 +11,8 @@ import com.example.localhub.repository.CommentRepository;
 import com.example.localhub.repository.MemberRepository;
 import com.example.localhub.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,6 +126,11 @@ public class CommentService {
         comment.setLikes(Math.max(0, comment.getLikes() - 1));
     }
 
+    public Page<CommentResponse> getMyComments(Long memberId, Pageable pageable) {
+        return commentRepository.findAllByAuthorId(memberId, pageable)
+                .map(comment -> toResponse(comment, memberId));
+    }
+
     // DTO 변환 메서드 (viewerId를 받아서 좋아요 여부 체크)
     private CommentResponse toResponse(Comment comment, Long viewerId) {
         CommentResponse dto = new CommentResponse();
@@ -131,8 +138,10 @@ public class CommentService {
 
         if (comment.isAnonymous()) {
             dto.setAuthor("익명");
+            dto.setRole(null);
         } else {
             dto.setAuthor(comment.getAuthor().getNickname());
+            dto.setRole(comment.getAuthor().getRole().name());
         }
 
         dto.setAuthorId(comment.getAuthor().getId().toString());

@@ -258,7 +258,6 @@ public class PostService {
 
     // 즐겨찾기 (별) 토글 기능
     public void toggleBookmark(Long postId, Long memberId) {
-        // 이미 즐겨찾기 했으면 삭제, 안 했으면 추가
         Optional<PostBookmark> bookmark = postBookmarkRepository.findByPostIdAndMemberId(postId, memberId);
 
         if (bookmark.isPresent()) {
@@ -273,10 +272,48 @@ public class PostService {
         }
     }
 
+    // 북마크 기능 (마이페이지에 글 목록)
     @Transactional(readOnly = true)
     public Page<PostResponse> getMyBookmarkedPosts(Long memberId, Pageable pageable) {
         return postBookmarkRepository.findBookmarkedPostsByMemberId(memberId, pageable)
                 .map(this::toResponse);
+    }
+
+    // 게시글 조회 기능 (마이페이지)
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getMyPosts(Long memberId, Pageable pageable) {
+        return postRepository.findAllByAuthorId(memberId, pageable)
+                .map(this::toResponse); // 기존 toResponse 메서드 재활용
+    }
+
+    // 좋아요 한 게시글 조회 기능 (마이페이지)
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getMyLikedPosts(Long memberId, Pageable pageable) {
+        return postRepository.findLikedPostsByMemberId(memberId, pageable)
+                .map(post -> {
+                    PostResponse dto = toResponse(post);
+                    dto.setLiked(true);
+                    return dto;
+                });
+    }
+
+    // 특정 작성자 게시글 목록 조회
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPostsByAuthorId(Long authorId, Pageable pageable, Long currentMemberId) {
+        return postRepository.findAllByAuthorId(authorId, pageable)
+                .map(post -> {
+                    PostResponse dto = toResponse(post);
+                    if (currentMemberId != null) {
+                        dto.setLiked(postLikeRepository.existsByPostIdAndMemberId(post.getId(), currentMemberId));
+                    }
+                    return dto;
+                });
+    }
+
+    // 사용자가 가장 자주 방문한 지역 조회
+    @Transactional(readOnly = true)
+    public String getTopRegion(Long memberId) {
+        return postRepository.findTopRegionByAuthorId(memberId);
     }
 
    // DTO 변환

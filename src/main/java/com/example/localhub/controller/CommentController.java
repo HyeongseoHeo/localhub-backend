@@ -5,6 +5,8 @@ import com.example.localhub.dto.comment.CommentResponse;
 import com.example.localhub.service.CommentService;
 import com.example.localhub.security.details.MemberDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +62,15 @@ public class CommentController {
     ) {
         Long memberId = memberDetails.getMember().getId();
         commentService.unlikeComment(commentId, memberId);
+    }
+
+    @GetMapping("/me/comments")
+    public Page<CommentResponse> getMyComments(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long memberId = memberDetails.getMember().getId();
+        return commentService.getMyComments(memberId, pageable);
     }
 }
 

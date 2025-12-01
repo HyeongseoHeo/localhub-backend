@@ -18,6 +18,7 @@ public class CommentResponse {
 
     private int likesCount;
     private boolean liked;
+    private String role;
 }
 
 

@@ -147,8 +147,25 @@ public class PostController {
                          @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
                          @RequestParam int score
     ) {
-        Long memberId = memberDetails.getMember().getId(); // @AuthenticationPrincipal이 로그인 안 했으면 403을 반환하므로 null 체크 생략 가능
+        Long memberId = memberDetails.getMember().getId();
         postService.ratePost(id, memberId, score);
+    }
+
+    // 즐겨찾기 (별) 토글
+    @PostMapping("/{id}/bookmark")
+    public void toggleBookmark(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+        postService.toggleBookmark(id, memberDetails.getMember().getId());
+    }
+
+    // 특정 작성자 게시글 목록 조회
+    @GetMapping("/author/{authorId}")
+    public Page<PostResponse> getPostsByAuthor(
+            @PathVariable Long authorId,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long currentMemberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+        return postService.getPostsByAuthorId(authorId, pageable, currentMemberId);
     }
 }
 
