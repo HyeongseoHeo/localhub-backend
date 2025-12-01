@@ -12,8 +12,9 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByRegion(String region, Pageable pageable);
-
     Page<Post> findDistinctByTagsIn(List<String> tags, Pageable pageable);
+    // 특정 작성자가 특정 지역에 쓴 글 개수 카운트
+    Long countByRegionAndAuthorId(String region, Long authorId);
     // [내가 쓴 글] 작성자 ID로 페이징 조회
     Page<Post> findAllByAuthorId(Long authorId, Pageable pageable);
     // [내가 좋아요 한 글] JOIN을 이용해 좋아요 테이블을 거쳐서 Post 가져오기

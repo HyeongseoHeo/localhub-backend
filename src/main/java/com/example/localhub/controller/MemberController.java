@@ -6,6 +6,7 @@ import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.comment.CommentResponse;
 import com.example.localhub.dto.member.MemberLoginRequest;
 import com.example.localhub.dto.member.MemberSignupRequest;
+import com.example.localhub.dto.member.TopRegionStatResponse;
 import com.example.localhub.security.details.MemberDetailsService;
 import com.example.localhub.service.CommentService;
 import com.example.localhub.service.MemberService;
@@ -233,12 +234,13 @@ public class MemberController {
 
     // 사용자가 가장 자주 방문한 지역 조회
     @GetMapping("/{memberId}/top-region")
-    public Map<String, String> getTopRegion(@PathVariable Long memberId) {
-        String topRegion = postService.getTopRegion(memberId);
+    public TopRegionStatResponse getTopRegion(@PathVariable Long memberId) {
+        TopRegionStatResponse stats = postService.getTopRegionStats(memberId);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("region", topRegion);
-        return response;
+        if (stats == null) {
+            return null;
+        }
+        return stats;
     }
 }
 

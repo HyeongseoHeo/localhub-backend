@@ -7,6 +7,7 @@ import com.example.localhub.dto.board.PlaceResponse;
 import com.example.localhub.dto.board.PostRequest;
 import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.board.RecommendedPostResponse;
+import com.example.localhub.dto.member.TopRegionStatResponse;
 import com.example.localhub.repository.*;
 import com.example.localhub.domain.board.PostLike;
 import com.example.localhub.domain.board.PostRating;
@@ -308,6 +309,24 @@ public class PostService {
                     }
                     return dto;
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public TopRegionStatResponse getTopRegionStats(Long memberId) {
+        String topRegionCode = postRepository.findTopRegionByAuthorId(memberId);
+
+        if (topRegionCode == null) {
+            return null;
+        }
+
+        // 해당 지역의 총 게시글 수를 카운트합니다.
+        Long visitCount = postRepository.countByRegionAndAuthorId(topRegionCode, memberId);
+
+        return new TopRegionStatResponse(
+                topRegionCode,
+                visitCount
+        );
+
     }
 
     // 사용자가 가장 자주 방문한 지역 조회
