@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.example.localhub.security.details.MemberDetailsService;
 import org.springframework.http.HttpStatus;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.List;
 
@@ -131,8 +132,12 @@ public class PostController {
 
     // 추천 목록 조회 (인증 필수 아님)
     @GetMapping("/recommended")
-    public List<RecommendedPostResponse> recommended() {
-        return postService.getRecommended();
+    public List<RecommendedPostResponse> recommended(@RequestParam(required = false) String tags) {
+        List<String> tagList = (tags != null && !tags.isBlank())
+                ? List.of(tags.split(","))
+                : Collections.emptyList();
+
+        return postService.getRecommended(tagList);
     }
 
     // 별점 주기 API (인증 필수)

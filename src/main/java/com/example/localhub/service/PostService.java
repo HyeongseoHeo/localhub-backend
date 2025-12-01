@@ -16,6 +16,7 @@ import com.example.localhub.repository.PostRatingRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -156,8 +157,6 @@ public class PostService {
             post.setLatitude(null);
             post.setLongitude(null);
         }
-
-
         //Post saved = postRepository.save(post);
         return toResponse(post);
     }
@@ -240,8 +239,14 @@ public class PostService {
     }
 
     // 추천 게시글 조회
-    public List<RecommendedPostResponse> getRecommended() {
-        return postRepository.findTop5ByAdFalseOrderByViewsDescLikesDesc()
+    public List<RecommendedPostResponse> getRecommended(List<String> tags) {
+        // 1. 태그가 없으면 -> 빈 리스트 반환 (프론트에서 "비슷한 게시글이 없습니다" 띄움)
+        if (tags == null || tags.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. 태그가 있으면 -> 해당 태그가 포함된 게시글 중 최신순 5개 조회
+        return postRepository.findDistinctByTagsIn(tags, PageRequest.of(0, 5))
                 .stream()
                 .map(this::toRecommended)
                 .toList();

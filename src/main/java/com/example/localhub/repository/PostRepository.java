@@ -14,8 +14,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByRegion(String region, Pageable pageable);
 
     Page<Post> findDistinctByTagsIn(List<String> tags, Pageable pageable);
-
-    List<Post> findTop5ByAdFalseOrderByViewsDescLikesDesc();
 }
 
 

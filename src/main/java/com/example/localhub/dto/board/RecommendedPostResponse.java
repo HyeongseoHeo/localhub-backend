@@ -1,15 +1,21 @@
 package com.example.localhub.dto.board;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecommendedPostResponse {
 
     private Long id;
-    private String author;    // 작성자
-    private String content;   // 앞부분만 잘라서
+    private String title;
+    private String author;
+    private String content;
+    private String thumbnail;
 }
 
 
