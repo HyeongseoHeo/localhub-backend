@@ -31,13 +31,10 @@ public class PostController {
     public Page<PostResponse> list(
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String tags,
-            Optional<MemberDetailsService.MemberDetails> memberDetails,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
-        Long memberId = memberDetails
-                .map(MemberDetailsService.MemberDetails::getMember)
-                .map(Member::getId)
-                .orElse(null);
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
 
         if (tags != null && !tags.isBlank()) {
             List<String> tagList = List.of(tags.split(","));
@@ -54,14 +51,12 @@ public class PostController {
     @GetMapping("/{id}")
     public PostResponse detail(
             @PathVariable Long id,
-            Optional<MemberDetailsService.MemberDetails> memberDetails,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        Long memberId = memberDetails
-                .map(MemberDetailsService.MemberDetails::getMember)
-                .map(Member::getId)
-                .orElse(null);
+
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
 
         String cookieName = "postView_" + id;
         boolean shouldIncreaseView = true;
