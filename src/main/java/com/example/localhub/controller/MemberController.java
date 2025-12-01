@@ -139,28 +139,62 @@ public class MemberController {
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
-        Long memberId = memberDetails.getMember().getId();
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+
         return postService.getMyPosts(memberId, pageable);
     }
 
     // 작성한 댓글
     @GetMapping("/me/comments")
     public Page<CommentResponse> getMyComments(
-            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails, Pageable pageable) {
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
+            Pageable pageable
+    ) {
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+
         return commentService.getMyComments(memberDetails.getMember().getId(), pageable);
     }
 
     // 여행 기록 조회
     @GetMapping("/me/travel-notes")
     public List<TravelNote> getMyNotes(
-            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
+    ) {
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+
         return travelNoteService.getMyNotes(memberDetails.getMember().getId());
     }
 
     // 여행 기록 작성
     @PostMapping("/me/travel-notes")
     public void createNote(
-            @RequestBody Map<String, String> body, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+            @RequestBody Map<String, String> body, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
+    ) {
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
         travelNoteService.createNote(memberDetails.getMember().getId(), body.get("content"));
     }
 
@@ -170,7 +204,14 @@ public class MemberController {
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
-        Long memberId = memberDetails.getMember().getId();
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+
         return postService.getMyLikedPosts(memberId, pageable);
     }
 
@@ -179,7 +220,14 @@ public class MemberController {
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
-        Long memberId = memberDetails.getMember().getId();
+        Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (memberId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
+            );
+        }
+
         return postService.getMyBookmarkedPosts(memberId, pageable);
     }
 
