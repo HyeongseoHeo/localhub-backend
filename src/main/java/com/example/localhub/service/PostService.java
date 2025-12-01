@@ -2,6 +2,7 @@ package com.example.localhub.service;
 
 import com.example.localhub.domain.board.Post;
 import com.example.localhub.domain.member.Member;
+import com.example.localhub.dto.board.PlaceResponse;
 import com.example.localhub.dto.board.PostRequest;
 import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.board.RecommendedPostResponse;
@@ -116,15 +117,15 @@ public class PostService {
         post.setAuthor(member);
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
-
         post.setAd(Boolean.TRUE.equals(request.getAd()));
-
         post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
         post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
 
-        post.setAddress(request.getAddress());
-        post.setLatitude(request.getLatitude());
-        post.setLongitude(request.getLongitude());
+        if (request.getPlace() != null) {
+            post.setAddress(request.getPlace().getAddress());
+            post.setLatitude(request.getPlace().getLatitude());
+            post.setLongitude(request.getPlace().getLongitude());
+        }
 
         Post saved = postRepository.save(post);
         return toResponse(saved);
@@ -143,17 +144,22 @@ public class PostService {
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
         post.setAd(Boolean.TRUE.equals(request.getAd()));
-
         post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
         post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
 
-        post.setAddress(request.getAddress());
-        post.setLatitude(request.getLatitude());
-        post.setLongitude(request.getLongitude());
+        if (request.getPlace() != null) {
+            post.setAddress(request.getPlace().getAddress());
+            post.setLatitude(request.getPlace().getLatitude());
+            post.setLongitude(request.getPlace().getLongitude());
+        } else {
+            post.setAddress(null);
+            post.setLatitude(null);
+            post.setLongitude(null);
+        }
 
 
-        Post saved = postRepository.save(post);
-        return toResponse(saved);
+        //Post saved = postRepository.save(post);
+        return toResponse(post);
     }
 
     // 삭제
@@ -258,9 +264,14 @@ public class PostService {
         dto.setAd(post.isAd());
         dto.setTags(post.getTags() != null ? post.getTags() : Collections.emptyList());
         dto.setImages(post.getImages() != null ? post.getImages() : Collections.emptyList());
-        dto.setAddress(post.getAddress());
-        dto.setLatitude(post.getLatitude());
-        dto.setLongitude(post.getLongitude());
+        if (post.getAddress() != null || post.getLatitude() != null) {
+            PlaceResponse placeDto = PlaceResponse.builder()
+                    .address(post.getAddress())
+                    .latitude(post.getLatitude())
+                    .longitude(post.getLongitude())
+                    .build();
+            dto.setPlace(placeDto); // PostResponse에 setPlace 메서드가 있어야 함
+        }
 
         return dto;
     }

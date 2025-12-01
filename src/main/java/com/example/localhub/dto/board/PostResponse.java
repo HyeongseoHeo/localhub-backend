@@ -34,9 +34,7 @@ public class PostResponse {
     private List<String> tags;   // 태그
     private List<String> images; // 이미지
 
-    private String address;      // 주소
-    private Double latitude;     // 위도
-    private Double longitude;    // 경도
+    private PlaceResponse place;
 }
 
 

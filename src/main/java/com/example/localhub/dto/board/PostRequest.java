@@ -19,9 +19,7 @@ public class PostRequest {
     // 광고 이미지
     private List<String> images;
     // 지도 관련
-    private String address;
-    private Double latitude;
-    private Double longitude;
+    private PlaceResponse place;
 }
 
 
