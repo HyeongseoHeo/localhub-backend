@@ -44,6 +44,13 @@ public class CleanbotService {
             return false;
         }
 
+        for (String badWord : BAD_WORDS) {
+            if (content.contains(badWord)) {
+                log.info("클린봇(내장): 금칙어 감지 -> {}", badWord);
+                return true;
+            }
+        }
+
         try {
             String url = API_URL + apiKey;
 
@@ -56,6 +63,7 @@ public class CleanbotService {
 
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("TOXICITY", new HashMap<>());
+            attributes.put("PROFANITY", new HashMap<>());
             body.put("requestedAttributes", attributes);
 
             // 헤더 설정
@@ -85,7 +93,7 @@ public class CleanbotService {
             }
 
         } catch (Exception e) {
-            log.error("클린봇 API 호출 중 오류 발생 (정상으로 간주하고 통과)", e);
+            log.error("클린봇 API 호출 중 오류 (통과 처리)", e);
             // API 오류가 나면 글 저장을 막지 말고 일단 통과시킴
             return false;
         }
