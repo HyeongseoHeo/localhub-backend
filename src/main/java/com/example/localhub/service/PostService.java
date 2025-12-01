@@ -1,18 +1,15 @@
 package com.example.localhub.service;
 
 import com.example.localhub.domain.board.Post;
+import com.example.localhub.domain.board.PostBookmark;
 import com.example.localhub.domain.member.Member;
 import com.example.localhub.dto.board.PlaceResponse;
 import com.example.localhub.dto.board.PostRequest;
 import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.board.RecommendedPostResponse;
-import com.example.localhub.repository.CommentRepository;
-import com.example.localhub.repository.MemberRepository;
-import com.example.localhub.repository.PostRepository;
+import com.example.localhub.repository.*;
 import com.example.localhub.domain.board.PostLike;
-import com.example.localhub.repository.PostLikeRepository;
 import com.example.localhub.domain.board.PostRating;
-import com.example.localhub.repository.PostRatingRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,19 +32,21 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostRatingRepository postRatingRepository;
+    private final PostBookmarkRepository postBookmarkRepository;
 
     // 전체 목록 조회
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(Pageable pageable, Long memberId) {
         return postRepository.findAll(pageable)
                 .map(post -> {
-                    // 1. 엔티티 -> DTO 변환
                     PostResponse dto = toResponse(post);
 
-                    // 2. 로그인한 유저라면 좋아요 여부 확인해서 DTO에 세팅
                     if (memberId != null) {
                         boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
                         dto.setLiked(isLiked);
+
+                        boolean isBookmarked = postBookmarkRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                        dto.setBookmarked(isBookmarked);
                     }
                     return dto;
                 });
@@ -63,6 +63,9 @@ public class PostService {
                      if (memberId != null) {
                          boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
                          dto.setLiked(isLiked);
+
+                         boolean isBookmarked = postBookmarkRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                         dto.setBookmarked(isBookmarked);
                      }
                      return dto;
                  });
@@ -76,6 +79,9 @@ public class PostService {
                     if (memberId != null) {
                         boolean isLiked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
                         dto.setLiked(isLiked);
+
+                        boolean isBookmarked = postBookmarkRepository.existsByPostIdAndMemberId(post.getId(), memberId);
+                        dto.setBookmarked(isBookmarked);
                     }
                     return dto;
                 });
@@ -94,16 +100,14 @@ public class PostService {
 
         PostResponse dto = toResponse(post);
 
-        //로그인 안했으면 false 고정
+        //로그인 안했으면 false 고정, 좋아요 했으면 검사
         if (memberId == null) {
             dto.setLiked(false);
-            return dto;
+            dto.setBookmarked(false);
+        } else {
+            dto.setLiked(postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId));
+            dto.setBookmarked(postBookmarkRepository.existsByPostIdAndMemberId(post.getId(), memberId));
         }
-
-        // 로그인 했으면 좋아요 여부 검사
-        boolean liked = postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId);
-        dto.setLiked(liked);
-
         return dto;
     }
 
@@ -250,6 +254,29 @@ public class PostService {
                 .stream()
                 .map(this::toRecommended)
                 .toList();
+    }
+
+    // 즐겨찾기 (별) 토글 기능
+    public void toggleBookmark(Long postId, Long memberId) {
+        // 이미 즐겨찾기 했으면 삭제, 안 했으면 추가
+        Optional<PostBookmark> bookmark = postBookmarkRepository.findByPostIdAndMemberId(postId, memberId);
+
+        if (bookmark.isPresent()) {
+            postBookmarkRepository.delete(bookmark.get());
+        } else {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("게시글 없음"));
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+            postBookmarkRepository.save(new PostBookmark(post, member));
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getMyBookmarkedPosts(Long memberId, Pageable pageable) {
+        return postBookmarkRepository.findBookmarkedPostsByMemberId(memberId, pageable)
+                .map(this::toResponse);
     }
 
    // DTO 변환

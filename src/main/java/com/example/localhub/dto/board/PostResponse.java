@@ -34,7 +34,9 @@ public class PostResponse {
     private List<String> tags;   // 태그
     private List<String> images; // 이미지
 
-    private PlaceResponse place;
+    private PlaceResponse place; // 지도 장소
+    private boolean bookmarked;  // 즐겨찾기 여부
 }
+
 
 
