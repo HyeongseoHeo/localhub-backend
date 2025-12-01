@@ -174,7 +174,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    // 별점 등록/수정 메서드
+    // 별점 등록
     public void ratePost(Long postId, Long memberId, int score) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
@@ -182,7 +182,7 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
         PostRating rating = postRatingRepository.findByPostIdAndMemberId(postId, memberId)
-                .orElse(null); // 없으면 새로 만듦
+                .orElse(null);
 
         if (rating != null) {
             rating.updateScore(score);
@@ -196,8 +196,12 @@ public class PostService {
         }
 
         Double average = postRatingRepository.getAverageScoreByPostId(postId);
+        Long ratingCount = postRatingRepository.countByPostId(postId);
+        Integer totalScore = postRatingRepository.sumScoreByPostId(postId);
 
         post.updateAverageRating(average != null ? average : 0.0);
+        post.setRatingCount(ratingCount != null ? ratingCount.intValue() : 0);
+        post.setTotalRatingScore(totalScore != null ? totalScore : 0);
         postRepository.save(post);
     }
 
