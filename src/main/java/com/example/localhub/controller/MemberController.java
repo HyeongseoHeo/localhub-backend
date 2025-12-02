@@ -7,6 +7,7 @@ import com.example.localhub.dto.comment.CommentResponse;
 import com.example.localhub.dto.member.MemberLoginRequest;
 import com.example.localhub.dto.member.MemberSignupRequest;
 import com.example.localhub.dto.member.TopRegionStatResponse;
+import com.example.localhub.dto.member.TravelNoteRequest;
 import com.example.localhub.security.details.MemberDetailsService;
 import com.example.localhub.service.CommentService;
 import com.example.localhub.service.MemberService;
@@ -186,8 +187,10 @@ public class MemberController {
 
     // 여행 기록 작성
     @PostMapping("/me/travel-notes")
+    @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public void createNote(
-            @RequestBody Map<String, String> body, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
+            @RequestBody TravelNoteRequest request,
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
     ) {
         Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
 
@@ -196,7 +199,8 @@ public class MemberController {
                     org.springframework.http.HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."
             );
         }
-        travelNoteService.createNote(memberDetails.getMember().getId(), body.get("content"));
+
+        travelNoteService.createNote(memberId, request);
     }
 
     // 좋아요 한 글 목록
