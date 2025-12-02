@@ -1,6 +1,7 @@
 package com.example.localhub.controller;
 
 import com.example.localhub.domain.member.TravelNote;
+import com.example.localhub.dto.member.TravelNoteRequest;
 import com.example.localhub.security.details.MemberDetailsService;
 import com.example.localhub.service.TravelNoteService;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,11 @@ public class TravelNoteController {
     // 여행 메모 생성
     @PostMapping
     public void createNote(
-            @RequestBody Map<String, String> body,
+            @RequestBody TravelNoteRequest request, // [수정] Map -> DTO로 변경
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
     ) {
-        travelNoteService.createNote(memberDetails.getMember().getId(), body.get("content"));
+        Long memberId = memberDetails.getMember().getId();
+        travelNoteService.createNote(memberId, request);
     }
 
     // 여행 메모 삭제
