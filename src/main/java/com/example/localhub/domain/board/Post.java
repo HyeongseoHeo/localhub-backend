@@ -112,7 +112,7 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // [추가] 평균 별점 업데이트 메서드 (Service에서 호출)
+    // 평균 별점 업데이트 메서드 (Service에서 호출)
     public void updateAverageRating(double averageRating) {
         // 소수점 한 자리까지 반올림 (예: 4.666 -> 4.7)
         this.averageRating = Math.round(averageRating * 10.0) / 10.0;

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -244,14 +245,19 @@ public class PostService {
     }
 
     // 추천 게시글 조회
-    public List<RecommendedPostResponse> getRecommended(List<String> tags) {
-        // 1. 태그가 없으면 -> 빈 리스트 반환 (프론트에서 "비슷한 게시글이 없습니다" 띄움)
-        if (tags == null || tags.isEmpty()) {
+    @Transactional(readOnly = true)
+    public List<RecommendedPostResponse> getRecommended(String region, List<String> tags) {
+
+        if (region == null || region.isBlank() || tags == null || tags.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // 2. 태그가 있으면 -> 해당 태그가 포함된 게시글 중 최신순 5개 조회
-        return postRepository.findDistinctByTagsIn(tags, PageRequest.of(0, 5))
+        Sort sort = Sort.by(
+                Sort.Order.desc("likes"),
+                Sort.Order.desc("views")
+        );
+
+        return postRepository.findDistinctByRegionAndTagsIn(region, tags, PageRequest.of(0, 5, sort))
                 .stream()
                 .map(this::toRecommended)
                 .toList();
@@ -311,6 +317,7 @@ public class PostService {
                 });
     }
 
+    // 사용자가 가장 많이 방문한 지역 정보 조회
     @Transactional(readOnly = true)
     public TopRegionStatResponse getTopRegionStats(Long memberId) {
         String topRegionCode = postRepository.findTopRegionByAuthorId(memberId);
@@ -319,7 +326,6 @@ public class PostService {
             return null;
         }
 
-        // 해당 지역의 총 게시글 수를 카운트합니다.
         Long visitCount = postRepository.countByRegionAndAuthorId(topRegionCode, memberId);
 
         return new TopRegionStatResponse(

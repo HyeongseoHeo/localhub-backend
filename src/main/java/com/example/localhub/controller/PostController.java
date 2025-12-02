@@ -132,12 +132,15 @@ public class PostController {
 
     // 추천 목록 조회 (인증 필수 아님)
     @GetMapping("/recommended")
-    public List<RecommendedPostResponse> recommended(@RequestParam(required = false) String tags) {
+    public List<RecommendedPostResponse> recommended(
+            @RequestParam String region, // [추가] 필수 파라미터로 받음
+            @RequestParam(required = false) String tags
+    ) {
         List<String> tagList = (tags != null && !tags.isBlank())
                 ? List.of(tags.split(","))
                 : Collections.emptyList();
 
-        return postService.getRecommended(tagList);
+        return postService.getRecommended(region, tagList);
     }
 
     // 별점 주기 API (인증 필수)
