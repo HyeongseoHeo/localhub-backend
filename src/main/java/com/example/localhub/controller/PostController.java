@@ -124,7 +124,8 @@ public class PostController {
     // 좋아요 (인증 필수)
     @PostMapping("/{id}/like")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void like(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+    public void like(@PathVariable Long id,
+                     @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
         Long memberId = memberDetails.getMember().getId();
         postService.likePost(id, memberId);
     }
@@ -132,7 +133,8 @@ public class PostController {
     // 좋아요 취소 (인증 필수)
     @DeleteMapping("/{id}/like")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unlike(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+    public void unlike(@PathVariable Long id,
+                       @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
         Long memberId = memberDetails.getMember().getId();
         postService.unlikePost(id, memberId);
     }
@@ -140,7 +142,7 @@ public class PostController {
     // 추천 목록 조회 (인증 필수 아님)
     @GetMapping("/recommended")
     public List<RecommendedPostResponse> recommended(
-            @RequestParam String region, // [추가] 필수 파라미터로 받음
+            @RequestParam String region,
             @RequestParam(required = false) String tags
     ) {
         List<String> tagList = (tags != null && !tags.isBlank())
@@ -163,7 +165,8 @@ public class PostController {
 
     // 즐겨찾기 (별) 토글
     @PostMapping("/{id}/bookmark")
-    public void toggleBookmark(@PathVariable Long id, @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
+    public void toggleBookmark(@PathVariable Long id,
+                               @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails) {
         postService.toggleBookmark(id, memberDetails.getMember().getId());
     }
 

@@ -51,11 +51,7 @@ public class FriendService {
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendRequests(String userEmail) {
 
-        System.out.println("=========================================");
-        System.out.println("현재 로그인한 사람의 이메일(요청값): [" + userEmail + "]");
-        System.out.println("=========================================");
-
-        // ▼ [수정됨] 에러 메시지 추가
+        // 에러 메시지 추가
         Member user = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
@@ -67,13 +63,12 @@ public class FriendService {
     // 3. 친구 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendList(String userEmail) {
-        // ▼ [수정됨] 에러 메시지 추가
+
         Member user = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
         return friendshipRepository.findAllFriends(user).stream()
                 .map(f -> {
-                    // 친구 관계에서 '상대방'이 누구인지 판별
                     Member friend = f.getRequester().equals(user) ? f.getReceiver() : f.getRequester();
                     return FriendResponse.from(friend, f.getId());
                 })
@@ -86,9 +81,9 @@ public class FriendService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
 
         if (accept) {
-            friendship.acceptFriendship(); // 상태를 ACCEPTED로 변경
+            friendship.acceptFriendship();
         } else {
-            friendshipRepository.delete(friendship); // 거절 시 데이터 삭제
+            friendshipRepository.delete(friendship);
         }
     }
 

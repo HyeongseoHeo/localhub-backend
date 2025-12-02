@@ -312,7 +312,7 @@ public class PostService {
     @Transactional(readOnly = true)
     public Page<PostResponse> getMyPosts(Long memberId, Pageable pageable) {
         return postRepository.findAllByAuthorId(memberId, pageable)
-                .map(this::toResponse); // 기존 toResponse 메서드 재활용
+                .map(this::toResponse);
     }
 
     // 좋아요 한 게시글 조회 기능 (마이페이지)

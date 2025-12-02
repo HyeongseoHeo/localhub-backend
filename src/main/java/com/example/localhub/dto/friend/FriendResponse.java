@@ -16,7 +16,7 @@ public class FriendResponse {
     public static FriendResponse from(Member member, Long friendshipId) {
         return FriendResponse.builder()
                 .id(friendshipId != null ? friendshipId : member.getId())
-                .name(member.getNickname()) // 실제 멤버 필드명에 맞게 수정하세요 (nickname 등)
+                .name(member.getNickname())
                 .email(member.getEmail())
                 .build();
     }
