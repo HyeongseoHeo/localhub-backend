@@ -13,6 +13,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findByRegion(String region, Pageable pageable);
     Page<Post> findDistinctByTagsIn(List<String> tags, Pageable pageable);
+    // 검색
+    Page<Post> findByContentContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<Post> findByRegionAndContentContainingIgnoreCase(String region, String keyword, Pageable pageable);
     // 특정 작성자가 특정 지역에 쓴 글 개수 카운트
     Long countByRegionAndAuthorId(String region, Long authorId);
     // [태그 + 지역] 태그가 일치하면서 + 해당 지역인 게시글 찾기

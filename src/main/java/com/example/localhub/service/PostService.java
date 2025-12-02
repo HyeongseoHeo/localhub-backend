@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +53,6 @@ public class PostService {
                 });
     }
 
-
      // 지역 기반 목록 조회
      @Transactional(readOnly = true)
      public Page<PostResponse> getPostsByRegion(String region, Pageable pageable, Long memberId) {
@@ -73,6 +71,32 @@ public class PostService {
                  });
      }
 
+     // 키워드 검색
+    @Transactional(readOnly = true)
+    public Page<PostResponse> searchPostsByKeyword(String keyword, Pageable pageable, Long memberId) {
+        return postRepository.findByContentContainingIgnoreCase(keyword, pageable)
+                .map(post -> {
+                    PostResponse dto = toResponse(post);
+                    if (memberId != null) {
+                        dto.setLiked(postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId));
+                    }
+                    return dto;
+                });
+    }
+
+    // 키워드 + 지역 검색
+    @Transactional(readOnly = true)
+    public Page<PostResponse> searchPostsByRegionAndKeyword(String region, String keyword, Pageable pageable, Long memberId) {
+        return postRepository.findByRegionAndContentContainingIgnoreCase(region, keyword, pageable)
+                .map(post -> {
+                    PostResponse dto = toResponse(post);
+                    if (memberId != null) {
+                        dto.setLiked(postLikeRepository.existsByPostIdAndMemberId(post.getId(), memberId));
+                    }
+                    return dto;
+                });
+    }
+
     @Transactional(readOnly = true)
     public Page<PostResponse> getPostsByTags(List<String> tags, Pageable pageable, Long memberId) {
         return postRepository.findDistinctByTagsIn(tags, pageable)
@@ -88,7 +112,6 @@ public class PostService {
                     return dto;
                 });
     }
-
 
      // 상세 조회
     public PostResponse getPost(Long id, Long memberId, boolean shouldIncreaseView) {
@@ -112,7 +135,6 @@ public class PostService {
         }
         return dto;
     }
-
 
      // 게시글 생성
     public PostResponse createPost(PostRequest request, Long memberId) {
@@ -333,12 +355,6 @@ public class PostService {
                 visitCount
         );
 
-    }
-
-    // 사용자가 가장 자주 방문한 지역 조회
-    @Transactional(readOnly = true)
-    public String getTopRegion(Long memberId) {
-        return postRepository.findTopRegionByAuthorId(memberId);
     }
 
    // DTO 변환

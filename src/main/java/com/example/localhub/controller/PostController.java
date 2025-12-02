@@ -4,7 +4,6 @@ import com.example.localhub.dto.board.PostRequest;
 import com.example.localhub.dto.board.PostResponse;
 import com.example.localhub.dto.board.RecommendedPostResponse;
 import com.example.localhub.service.PostService;
-import com.example.localhub.domain.member.Member;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +16,6 @@ import com.example.localhub.security.details.MemberDetailsService;
 import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.List;
 
 @RestController
@@ -32,10 +30,19 @@ public class PostController {
     public Page<PostResponse> list(
             @RequestParam(required = false) String region,
             @RequestParam(required = false) String tags,
+            @RequestParam(required = false) String search,
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
             Pageable pageable
     ) {
         Long memberId = (memberDetails != null) ? memberDetails.getMember().getId() : null;
+
+        if (search != null && !search.isBlank()) {
+            if (region != null && !region.isBlank()) {
+                return postService.searchPostsByRegionAndKeyword(region, search, pageable, memberId);
+            }
+            return postService.searchPostsByKeyword(search, pageable, memberId);
+        }
+
 
         if (tags != null && !tags.isBlank()) {
             List<String> tagList = List.of(tags.split(","));
