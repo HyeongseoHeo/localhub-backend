@@ -50,6 +50,11 @@ public class FriendService {
     // 2. 받은 친구 요청 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendRequests(String userEmail) {
+
+        System.out.println("=========================================");
+        System.out.println("현재 로그인한 사람의 이메일(요청값): [" + userEmail + "]");
+        System.out.println("=========================================");
+
         // ▼ [수정됨] 에러 메시지 추가
         Member user = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
