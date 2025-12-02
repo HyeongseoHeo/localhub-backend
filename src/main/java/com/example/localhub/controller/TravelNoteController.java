@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/travel-notes")
@@ -20,7 +19,10 @@ public class TravelNoteController {
 
     // 특정 사용자 여행 메모 목록 조회
     @GetMapping
-    public List<TravelNote> getNotes(@RequestParam Long memberId) {
+    public List<TravelNote> getNotes(
+            @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
+    ) {
+        Long memberId = memberDetails.getMember().getId();
         return travelNoteService.getMyNotes(memberId);
     }
 
