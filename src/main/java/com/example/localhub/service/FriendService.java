@@ -50,7 +50,9 @@ public class FriendService {
     // 2. 받은 친구 요청 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendRequests(String userEmail) {
-        Member user = memberRepository.findByEmail(userEmail).orElseThrow();
+        // ▼ [수정됨] 에러 메시지 추가
+        Member user = memberRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
         return friendshipRepository.findAllByReceiverAndStatus(user, FriendshipStatus.PENDING).stream()
                 .map(f -> FriendResponse.from(f.getRequester(), f.getId()))
@@ -60,7 +62,9 @@ public class FriendService {
     // 3. 친구 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendList(String userEmail) {
-        Member user = memberRepository.findByEmail(userEmail).orElseThrow();
+        // ▼ [수정됨] 에러 메시지 추가
+        Member user = memberRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
         return friendshipRepository.findAllFriends(user).stream()
                 .map(f -> {
@@ -85,9 +89,6 @@ public class FriendService {
 
     // 5. 친구 삭제
     public void deleteFriend(Long friendId, String userEmail) {
-        // 친구 삭제 로직은 friendshipId를 받거나, 상대방 memberId를 받아서 해당 관계를 찾아 삭제해야 함
-        // 여기서는 프론트에서 넘어오는 friendId가 'Friendship 테이블의 PK'라고 가정하고 짭니다.
-        // 만약 MemberId라면 로직을 조금 수정해야 합니다.
         friendshipRepository.deleteById(friendId);
     }
 }

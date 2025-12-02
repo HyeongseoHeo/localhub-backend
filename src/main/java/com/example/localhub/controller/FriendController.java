@@ -1,6 +1,5 @@
 package com.example.localhub.controller;
 
-
 import com.example.localhub.dto.friend.FriendRequest;
 import com.example.localhub.dto.friend.FriendResponse;
 import com.example.localhub.service.FriendService;
@@ -36,18 +35,20 @@ public class FriendController {
     @PostMapping("/requests")
     public ResponseEntity<Void> sendFriendRequest(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody FriendRequest dto) {
+            @RequestBody FriendRequest dto) { // import한 DTO 이름과 일치하는지 확인하세요
         friendService.sendFriendRequest(userDetails.getUsername(), dto.getEmail());
         return ResponseEntity.ok().build();
     }
 
-    // 4. 친구 요청 수락/거절
+    // 4. 친구 요청 수락/거절 (수정됨!)
     @PostMapping("/requests/{requestId}")
     public ResponseEntity<Void> respondFriendRequest(
             @PathVariable Long requestId,
-            @RequestBody Map<String, Boolean> body) { // { "accept": true } 형태 받기 위해 Map 사용
+            @RequestBody Map<String, Boolean> body) {
 
-        boolean accept = body.get("accept");
+        // [수정 포인트] 안전하게 가져오기 (값이 없으면 false 처리)
+        Boolean accept = body.getOrDefault("accept", false);
+
         friendService.respondFriendRequest(requestId, accept);
         return ResponseEntity.ok().build();
     }
