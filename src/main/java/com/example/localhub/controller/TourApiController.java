@@ -15,7 +15,7 @@ public class TourApiController {
 
     private final TourApiService tourApiService;
 
-    // 상세 설명 조회 (이건 남겨두세요! 프론트에서 설명 볼 때 씀)
+    // 상세 설명 조회
     @GetMapping("/detail")
     public ResponseEntity<String> getTourDetail(@RequestParam String contentId) {
         String overview = tourApiService.getTourOverview(contentId);

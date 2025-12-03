@@ -81,13 +81,17 @@ public class Post {
     private Double latitude;
     private Double longitude;
 
+    // SNS
+    private String title;
+
+    @Column(nullable = false)
+    private boolean isSns = false;
+
     // 이미지 URL 리스트
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "image_url")
     private List<String> images = new ArrayList<>();
-
-    // --- 연관 관계 매핑 ---
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();

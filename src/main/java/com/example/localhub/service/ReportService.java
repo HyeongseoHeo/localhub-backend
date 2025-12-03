@@ -54,9 +54,6 @@ public class ReportService {
 
     }
 
-    /**
-     * 신고 대상이 실제로 존재하는지 확인 (Post 또는 Comment)
-     */
     private void validateTargetExistence(String targetType, Long targetId) {
         if (targetType.equalsIgnoreCase("POST")) {
             postRepository.findById(targetId)

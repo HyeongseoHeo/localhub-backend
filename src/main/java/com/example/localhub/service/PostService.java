@@ -146,9 +146,13 @@ public class PostService {
         post.setAuthor(member);
         post.setRegion(request.getRegion());
         post.setContent(request.getContent());
+
         post.setAd(Boolean.TRUE.equals(request.getAd()));
         post.setTags(request.getTags() != null ? request.getTags() : Collections.emptyList());
         post.setImages(request.getImages() != null ? request.getImages() : Collections.emptyList());
+
+        post.setTitle(request.getContent().length() > 20 ? request.getContent().substring(0, 20) : request.getContent());
+        post.setSns(false);
 
         if (request.getPlace() != null) {
             post.setAddress(request.getPlace().getAddress());
@@ -365,6 +369,8 @@ public class PostService {
         dto.setAuthor(post.getAuthor().getNickname());
         dto.setAuthorId(post.getAuthor().getId().toString());
         dto.setRole(post.getAuthor().getRole().name());
+        dto.setTitle(post.getTitle());
+        dto.setSns(post.isSns());
         dto.setRegion(post.getRegion());
         dto.setContent(post.getContent());
         dto.setTimestamp(post.getCreatedAt());
@@ -378,6 +384,21 @@ public class PostService {
         dto.setAd(post.isAd());
         dto.setTags(post.getTags() != null ? post.getTags() : Collections.emptyList());
         dto.setImages(post.getImages() != null ? post.getImages() : Collections.emptyList());
+
+        if (post.getAuthor() != null) {
+            dto.setAuthor(post.getAuthor().getNickname());
+            dto.setAuthorId(post.getAuthor().getId().toString());
+            dto.setRole(post.getAuthor().getRole().name());
+        } else if (post.isSns()) {
+            dto.setAuthor("LocalHub System");
+            dto.setAuthorId("system");
+            dto.setRole("SYSTEM");
+        } else {
+            dto.setAuthor("알 수 없음");
+            dto.setAuthorId("unknown");
+            dto.setRole("USER");
+        }
+
         if (post.getAddress() != null || post.getLatitude() != null) {
             PlaceResponse placeDto = PlaceResponse.builder()
                     .address(post.getAddress())
