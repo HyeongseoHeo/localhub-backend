@@ -29,39 +29,52 @@ public class TourApiService {
     public List<TourApiResponse.Item> searchTourData(String keyword, Integer areaCode) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // ★ 1. 인코딩된 키 사용
-        String encodedServiceKey = getEncodedKey();
-
-        // URL 생성 빌더
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
-                .queryParam("serviceKey", encodedServiceKey) // ★ FIX: 인코딩된 키 사용
-                .queryParam("numOfRows", 10)
-                .queryParam("pageNo", 1)
-                .queryParam("MobileOS", "ETC")
-                .queryParam("MobileApp", "LocalHub")
-                .queryParam("_type", "json")
-                .queryParam("arrange", "A")
-                .queryParam("keyword", keyword)
-                .queryParam("contentTypeId", 12);
-
-        if (areaCode != null && areaCode > 0) {
-            builder.queryParam("areaCode", areaCode);
-        }
-
-        // 인코딩된 키를 사용했으므로, build(false)로 빌드하여 이중 인코딩을 방지
-        URI uri = builder.build(false).toUri();
-
+        // 인코딩된 키 사용
         try {
+            // ★ keyword만 먼저 수동 인코딩
+            String encodedKeyword = UriUtils.encode(keyword, StandardCharsets.UTF_8.name());
+
+            // ★ 인코딩된 키와 키워드 사용
+            String encodedServiceKey = getEncodedKey();
+
+            // URL 생성 빌더
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
+                    .queryParam("serviceKey", encodedServiceKey)
+                    .queryParam("numOfRows", 10)
+                    .queryParam("pageNo", 1)
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "LocalHub")
+                    .queryParam("_type", "json")
+                    .queryParam("arrange", "A")
+                    .queryParam("keyword", encodedKeyword)  // ★ 인코딩된 키워드 사용
+                    .queryParam("contentTypeId", 12);
+
+            if (areaCode != null && areaCode > 0) {
+                builder.queryParam("areaCode", areaCode);
+            }
+
+            // 이미 인코딩된 파라미터들을 사용하므로 build(false)
+            URI uri = builder.build(false).toUri();
+
+            System.out.println("🌐 Tour API 호출 URI: " + uri.toString());
+
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
+
+            System.out.println("✅ Tour API 응답: " + (response != null ? "받음" : "null"));
 
             if (response != null &&
                     response.getResponse() != null &&
                     response.getResponse().getBody() != null &&
                     response.getResponse().getBody().getItems() != null) {
 
-                return response.getResponse().getBody().getItems().getItem();
+                List<TourApiResponse.Item> items = response.getResponse().getBody().getItems().getItem();
+                System.out.println("✅ Tour API 결과 개수: " + (items != null ? items.size() : 0));
+                return items;
+            } else {
+                System.out.println("⚠️ Tour API 응답 데이터 없음");
             }
         } catch (Exception e) {
+            System.err.println("❌ Tour API 에러:");
             e.printStackTrace();
         }
 

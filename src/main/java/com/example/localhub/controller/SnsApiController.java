@@ -46,7 +46,6 @@ public class SnsApiController {
         EXCLUSION_MAP.put(36, List.of("부산", "울산", "경북", "대구"));
         EXCLUSION_MAP.put(4, List.of("부산", "울산", "경북", "경남"));
     }
-    // ★★★ ================================================= ★★★
 
     // 호출 주소: /api/sns/search?keyword=여행&areaCode=33
     @GetMapping("/search")
