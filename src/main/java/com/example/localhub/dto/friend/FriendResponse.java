@@ -12,6 +12,7 @@ public class FriendResponse {
     private String email;     // 친구 이메일
     private String profileImage; // 프로필 이미지 URL
 
+    // Member 엔티티를 DTO로 변환하는 정적 메서드
     public static FriendResponse from(Member member, Long friendshipId) {
         return FriendResponse.builder()
                 .id(friendshipId != null ? friendshipId : member.getId())

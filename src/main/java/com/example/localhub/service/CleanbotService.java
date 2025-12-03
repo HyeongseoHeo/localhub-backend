@@ -19,6 +19,7 @@ public class CleanbotService {
 
     private final RestTemplate restTemplate;
 
+    // 구글 Perspective API 주소
     private static final String API_URL = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=";
 
     @Value("${cleanbot.api.key}")
@@ -65,18 +66,22 @@ public class CleanbotService {
             attributes.put("PROFANITY", new HashMap<>());
             body.put("requestedAttributes", attributes);
 
+            // 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
+            // API 호출
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
 
+            // 점수 분석 (0.0 ~ 1.0)
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && responseBody.containsKey("attributeScores")) {
                 Map<String, Object> attributeScores = (Map<String, Object>) responseBody.get("attributeScores");
                 Map<String, Object> toxicity = (Map<String, Object>) attributeScores.get("TOXICITY");
                 Map<String, Object> summaryScore = (Map<String, Object>) toxicity.get("summaryScore");
 
+                // 안전하게 점수 추출
                 Object valueObj = summaryScore.get("value");
                 if (valueObj != null) {
                     Double score = Double.parseDouble(valueObj.toString());
@@ -89,6 +94,7 @@ public class CleanbotService {
 
         } catch (Exception e) {
             log.error("클린봇 API 호출 중 오류 (통과 처리)", e);
+            // API 오류가 나면 글 저장을 막지 말고 일단 통과시킴
             return false;
         }
 

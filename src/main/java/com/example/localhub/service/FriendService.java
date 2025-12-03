@@ -21,7 +21,7 @@ public class FriendService {
     private final FriendshipRepository friendshipRepository;
     private final MemberRepository memberRepository;
 
-    // 친구 요청 보내기
+    // 1. 친구 요청 보내기
     public void sendFriendRequest(String userEmail, String targetEmail) {
         Member requester = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -47,10 +47,11 @@ public class FriendService {
         friendshipRepository.save(friendship);
     }
 
-    // 받은 친구 요청 목록 조회
+    // 2. 받은 친구 요청 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendRequests(String userEmail) {
 
+        // 에러 메시지 추가
         Member user = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
@@ -59,7 +60,7 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    // 친구 목록 조회
+    // 3. 친구 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendList(String userEmail) {
 
@@ -74,7 +75,7 @@ public class FriendService {
                 .collect(Collectors.toList());
     }
 
-    // 친구 요청 수락/거절
+    // 4. 친구 요청 수락/거절
     public void respondFriendRequest(Long friendshipId, boolean accept) {
         Friendship friendship = friendshipRepository.findById(friendshipId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요청입니다."));
@@ -86,7 +87,7 @@ public class FriendService {
         }
     }
 
-    // 친구 삭제
+    // 5. 친구 삭제
     public void deleteFriend(Long friendId, String userEmail) {
         friendshipRepository.deleteById(friendId);
     }

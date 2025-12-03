@@ -20,42 +20,38 @@ public class TourApiService {
     @Value("${tour.api.key}")
     private String API_KEY;
 
-    // API 키를 URL 삽입 전에 수동으로 인코딩하는 헬퍼 메서드
+    // ★ [추가] API 키를 URL 삽입 전에 수동으로 인코딩하는 헬퍼 메서드
     private String getEncodedKey() {
+        // API_KEY에 있는 '='이나 '+' 문자를 %3D, %2B 등으로 치환하여 URL 구조가 깨지는 것을 방지
         return UriUtils.encode(API_KEY, StandardCharsets.UTF_8.name());
     }
 
     public List<TourApiResponse.Item> searchTourData(String keyword, Integer areaCode) {
         RestTemplate restTemplate = new RestTemplate();
 
+        // ★ 1. 인코딩된 키 사용
+        String encodedServiceKey = getEncodedKey();
+
+        // URL 생성 빌더
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
+                .queryParam("serviceKey", encodedServiceKey) // ★ FIX: 인코딩된 키 사용
+                .queryParam("numOfRows", 10)
+                .queryParam("pageNo", 1)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "LocalHub")
+                .queryParam("_type", "json")
+                .queryParam("arrange", "A")
+                .queryParam("keyword", keyword)
+                .queryParam("contentTypeId", 12);
+
+        if (areaCode != null && areaCode > 0) {
+            builder.queryParam("areaCode", areaCode);
+        }
+
+        // 인코딩된 키를 사용했으므로, build(false)로 빌드하여 이중 인코딩을 방지
+        URI uri = builder.build(false).toUri();
+
         try {
-            // keyword도 수동으로 인코딩
-            String encodedKeyword = keyword != null && !keyword.isEmpty()
-                    ? UriUtils.encode(keyword, StandardCharsets.UTF_8.name())
-                    : "";
-
-            // serviceKey도 인코딩
-            String encodedServiceKey = getEncodedKey();
-
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
-                    .queryParam("serviceKey", encodedServiceKey)
-                    .queryParam("numOfRows", 10)
-                    .queryParam("pageNo", 1)
-                    .queryParam("MobileOS", "ETC")
-                    .queryParam("MobileApp", "LocalHub")
-                    .queryParam("_type", "json")
-                    .queryParam("arrange", "A")
-                    .queryParam("keyword",encodedKeyword)
-                    .queryParam("contentTypeId", 12);
-
-            if (areaCode != null && areaCode > 0) {
-                builder.queryParam("areaCode", areaCode);
-            }
-
-            URI uri = builder.build(false).toUri();
-
-            System.out.println("Tour API URI: " + uri);
-
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
 
             if (response != null &&
@@ -63,15 +59,9 @@ public class TourApiService {
                     response.getResponse().getBody() != null &&
                     response.getResponse().getBody().getItems() != null) {
 
-                List<TourApiResponse.Item> items = response.getResponse().getBody().getItems().getItem();
-
-                System.out.println("Tour API 결과: " + (items != null ? items.size() : 0) + "개");
-                return items;
-            } else {
-                System.out.println("Tour API 응답 데이터 없음");
+                return response.getResponse().getBody().getItems().getItem();
             }
         } catch (Exception e) {
-            System.err.println("Tour API 에러:");
             e.printStackTrace();
         }
 
@@ -92,6 +82,7 @@ public class TourApiService {
                 .queryParam("contentId", contentId)
                 .queryParam("overviewYN", "Y");
 
+        // 인코딩된 키를 사용했으므로, build(false)로 빌드
         URI uri = builder.build(false).toUri();
 
         try {

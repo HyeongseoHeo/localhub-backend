@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class CommentResponse {
 
     private Long id;
-    private String author;
+    private String author;   // 닉네임
     private String authorId;
     private String content;
     private LocalDateTime timestamp;

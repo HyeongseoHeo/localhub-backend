@@ -19,7 +19,7 @@ public class FriendController {
 
     private final FriendService friendService;
 
-    // 친구 목록 조회
+    // 1. 친구 목록 조회
     @GetMapping
     public ResponseEntity<List<FriendResponse>> getFriends(
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
@@ -28,7 +28,7 @@ public class FriendController {
         return ResponseEntity.ok(friendService.getFriendList(userEmail));
     }
 
-    // 나에게 온 친구 요청 목록 조회
+    // 2. 나에게 온 친구 요청 목록 조회
     @GetMapping("/requests")
     public ResponseEntity<List<FriendResponse>> getFriendRequests(
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails
@@ -37,7 +37,7 @@ public class FriendController {
         return ResponseEntity.ok(friendService.getFriendRequests(userEmail));
     }
 
-    // 친구 요청 보내기
+    // 3. 친구 요청 보내기
     @PostMapping("/requests")
     public ResponseEntity<Void> sendFriendRequest(
             @AuthenticationPrincipal MemberDetailsService.MemberDetails memberDetails,
@@ -48,7 +48,7 @@ public class FriendController {
         return ResponseEntity.ok().build();
     }
 
-    // 친구 요청 수락/거절
+    // 4. 친구 요청 수락/거절
     @PostMapping("/requests/{requestId}")
     public ResponseEntity<Void> respondFriendRequest(
             @PathVariable Long requestId,
@@ -59,7 +59,7 @@ public class FriendController {
         return ResponseEntity.ok().build();
     }
 
-    // 친구 삭제
+    // 5. 친구 삭제
     @DeleteMapping("/{friendId}")
     public ResponseEntity<Void> deleteFriend(
             @PathVariable Long friendId,
