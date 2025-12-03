@@ -33,7 +33,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponse> getComments(Long postId, Long viewerId) {
 
-        // 1. 보는 사람의 '클린봇 설정' 확인
+        // 보는 사람의 '클린봇 설정' 확인
         boolean isViewerCleanbotOn = true;
         if (viewerId != null) {
             Member viewer = memberRepository.findById(viewerId).orElse(null);
@@ -44,11 +44,10 @@ public class CommentService {
 
         final boolean filterOn = isViewerCleanbotOn;
 
-        // 2. 댓글 목록 가져와서 변환
+        // 댓글 목록 가져와서 변환
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId)
                 .stream()
                 .map(comment -> {
-                    // viewerId를 넘겨서 좋아요 여부도 같이 체크
                     CommentResponse dto = toResponse(comment, viewerId);
 
                     if (comment.isMalicious() && filterOn) {

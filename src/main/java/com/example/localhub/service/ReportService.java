@@ -15,39 +15,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional // 데이터 변경 및 DB 조회(Exists)가 많으므로 트랜잭션 유지
+@Transactional
 public class ReportService {
 
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository; // 👈 댓글 검증을 위해 주입
+    private final CommentRepository commentRepository;
 
-    /**
-     * [최종] 신고 접수 로직 (게시글 및 댓글 모두 처리)
-     */
     public void createReport(Long reporterId, String targetType, Long targetId, String reason, String content) {
 
-        // 1. 신고자 존재 확인
         Member reporter = memberRepository.findById(reporterId)
                 .orElseThrow(() -> new RuntimeException("신고자 정보(memberId)를 찾을 수 없습니다."));
 
-        // 2. 중복 신고 확인
         if (reportRepository.existsByReporterIdAndTargetTypeAndTargetId(reporterId, targetType, targetId)) {
             throw new RuntimeException("이미 동일한 대상을 신고했습니다.");
         }
 
-        // 3. 신고 대상(Post/Comment) 유효성 검사
         validateTargetExistence(targetType, targetId);
 
-        // 4. Report 객체 생성 및 저장
         Report report = new Report();
         report.setReporter(reporter);
 
-        // 5. 신고 대상 정보 기록
         report.setTargetType(targetType);
         report.setTargetId(targetId);
-        report.setReason(mapReason(reason)); // String을 Enum으로 변환
+        report.setReason(mapReason(reason));
         report.setDetail(content);
 
         reportRepository.save(report);
@@ -67,9 +59,6 @@ public class ReportService {
     }
 
 
-    /**
-     * [재사용] 신고 사유 매핑 로직
-     */
     private ReportReason mapReason(String reason) {
         return switch (reason) {
             case "스팸 또는 광고" -> ReportReason.SPAM_AD;

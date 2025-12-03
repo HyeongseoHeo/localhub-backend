@@ -25,8 +25,6 @@ public class SnsApiController {
 
     private final TourApiService tourApiService;
     private final NaverApiService naverApiService;
-
-    // ★★★ [오류 수정] Map.of() 대신 static HashMap으로 초기화 ★★★
     private static final Map<Integer, List<String>> EXCLUSION_MAP;
 
     static {
@@ -50,22 +48,19 @@ public class SnsApiController {
     // 호출 주소: /api/sns/search?keyword=여행&areaCode=33
     @GetMapping("/search")
     public ResponseEntity<List<PostResponse>> searchCombinedSns(
-            @RequestParam(required = false) String keyword, // 키워드 필수 해제
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer areaCode
     ) {
         List<PostResponse> resultList = new ArrayList<>();
 
-        // [CHANGE 1] ★ "여행" 키워드 자동 포함 로직 (기능 요구사항) ★
+        // "여행" 키워드 자동 포함 로직 (기능 요구사항)
         String baseKeyword = keyword != null && !keyword.isEmpty() ? keyword : "";
-        String tourKeyword = String.join(" ", baseKeyword, "여행").trim(); // 예: "맛집 여행"
+        String tourKeyword = String.join(" ", baseKeyword, "여행").trim();
 
         String regionName = convertCodeToName(areaCode);
-        String blogQuery = String.join(" ", regionName, tourKeyword).trim(); // 예: "충북 맛집 여행"
+        String blogQuery = String.join(" ", regionName, tourKeyword).trim();
 
-        // ==========================================
-        // A. 공공데이터 (관광지)
-        // ==========================================
-        // tourKeyword 사용
+        // 공공데이터 (관광지)
         List<TourApiResponse.Item> tourItems = tourApiService.searchTourData(tourKeyword, areaCode);
         if (tourItems != null) {
             List<PostResponse> tourPosts = tourItems.stream()
@@ -86,9 +81,7 @@ public class SnsApiController {
             resultList.addAll(tourPosts);
         }
 
-        // ==========================================
-        // B. 네이버 블로그 (제외 필터 적용)
-        // ==========================================
+        // 네이버 블로그 (제외 필터 적용)
         List<NaverBlogResponse.Item> blogItems = naverApiService.searchBlog(blogQuery);
 
         if (blogItems != null && areaCode != null) {
@@ -131,7 +124,7 @@ public class SnsApiController {
             resultList.addAll(blogPosts);
         }
 
-        // 3. 두 리스트를 랜덤하게 섞기
+        // 두 리스트를 랜덤하게 섞기
         Collections.shuffle(resultList);
 
         return ResponseEntity.ok(resultList);

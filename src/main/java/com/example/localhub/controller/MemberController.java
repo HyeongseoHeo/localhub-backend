@@ -105,7 +105,6 @@ public class MemberController {
     public Map<String, String> logout() {
         Map<String, String> res = new HashMap<>();
         res.put("message", "로그아웃 성공");
-        // 클라이언트에게 토큰 삭제를 위임
         return res;
     }
 

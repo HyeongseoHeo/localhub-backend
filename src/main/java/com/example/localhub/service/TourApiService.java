@@ -37,7 +37,6 @@ public class TourApiService {
             // serviceKey도 인코딩
             String encodedServiceKey = getEncodedKey();
 
-            // URL 생성 빌더
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
                     .queryParam("serviceKey", encodedServiceKey)
                     .queryParam("numOfRows", 10)
@@ -53,7 +52,6 @@ public class TourApiService {
                 builder.queryParam("areaCode", areaCode);
             }
 
-            // 이미 인코딩했으므로 build(false)
             URI uri = builder.build(false).toUri();
 
             System.out.println("Tour API URI: " + uri);
