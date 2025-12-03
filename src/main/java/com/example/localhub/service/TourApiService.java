@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
+import java.nio.charset.StandardCharsets;
 
 import java.net.URI;
 import java.util.Collections;
@@ -18,33 +20,40 @@ public class TourApiService {
     @Value("${tour.api.key}")
     private String API_KEY;
 
+    // ★ [추가] API 키를 URL 삽입 전에 수동으로 인코딩하는 헬퍼 메서드
+    private String getEncodedKey() {
+        // API_KEY에 있는 '='이나 '+' 문자를 %3D, %2B 등으로 치환하여 URL 구조가 깨지는 것을 방지
+        return UriUtils.encode(API_KEY, StandardCharsets.UTF_8.name());
+    }
+
     public List<TourApiResponse.Item> searchTourData(String keyword, Integer areaCode) {
         RestTemplate restTemplate = new RestTemplate();
 
+        // ★ 1. 인코딩된 키 사용
+        String encodedServiceKey = getEncodedKey();
+
         // URL 생성 빌더
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/searchKeyword1")
-                .queryParam("serviceKey", API_KEY)
-                .queryParam("numOfRows", 10)      // 가져올 개수
+                .queryParam("serviceKey", encodedServiceKey) // ★ FIX: 인코딩된 키 사용
+                .queryParam("numOfRows", 10)
                 .queryParam("pageNo", 1)
                 .queryParam("MobileOS", "ETC")
                 .queryParam("MobileApp", "LocalHub")
-                .queryParam("_type", "json")      // JSON 응답 요청
-                .queryParam("arrange", "A")       // 정렬 (A=제목순)
+                .queryParam("_type", "json")
+                .queryParam("arrange", "A")
                 .queryParam("keyword", keyword)
-                .queryParam("contentTypeId", 12); // 12: 관광지
+                .queryParam("contentTypeId", 12);
 
-        // ★ 핵심: 지역 코드가 있을 때만 URL에 파라미터 추가
         if (areaCode != null && areaCode > 0) {
             builder.queryParam("areaCode", areaCode);
         }
 
-        // 인코딩 문제 방지를 위해 build(true) 사용
-        URI uri = builder.encode().build(true).toUri();
+        // 인코딩된 키를 사용했으므로, build(false)로 빌드하여 이중 인코딩을 방지
+        URI uri = builder.build(false).toUri();
 
         try {
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
 
-            // 데이터가 정상적으로 있는지 깊은 검사(Null Safety)
             if (response != null &&
                     response.getResponse() != null &&
                     response.getResponse().getBody() != null &&
@@ -53,26 +62,28 @@ public class TourApiService {
                 return response.getResponse().getBody().getItems().getItem();
             }
         } catch (Exception e) {
-            e.printStackTrace(); // 에러 발생 시 로그 출력
+            e.printStackTrace();
         }
 
-        // 데이터가 없거나 에러 나면 빈 리스트 반환 (서버 멈춤 방지)
         return Collections.emptyList();
     }
 
     public String getTourOverview(String contentId) {
         RestTemplate restTemplate = new RestTemplate();
 
-        URI uri = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/detailCommon1")
-                .queryParam("serviceKey", API_KEY)
+        // 인코딩된 키 사용
+        String encodedServiceKey = getEncodedKey();
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/detailCommon1")
+                .queryParam("serviceKey", encodedServiceKey) // ★ FIX: 인코딩된 키 사용
                 .queryParam("MobileOS", "ETC")
                 .queryParam("MobileApp", "LocalHub")
                 .queryParam("_type", "json")
                 .queryParam("contentId", contentId)
-                .queryParam("overviewYN", "Y")      // ★ 설명 필수 요청
-                .encode()
-                .build(true)
-                .toUri();
+                .queryParam("overviewYN", "Y");
+
+        // 인코딩된 키를 사용했으므로, build(false)로 빌드
+        URI uri = builder.build(false).toUri();
 
         try {
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
