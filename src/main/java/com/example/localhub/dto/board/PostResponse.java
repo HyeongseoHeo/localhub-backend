@@ -1,41 +1,53 @@
 package com.example.localhub.dto.board;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.List;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PostResponse {
 
     private Long id;
 
-    private String region;       // 지역 코드
-    private String author;       // 작성자 닉네임
-    private String authorId;     // 작성자 ID
-    private String role;         // 작성자의 역할
+    // SNS 탭용 제목 (추가됨)
+    private String title;
 
-    private String content;          // 게시글 내용
-    private LocalDateTime timestamp; // created_at
+    private String region;
+    private String author;
+    private String authorId;
+    private String role;
+
+    private String content;
+    private LocalDateTime timestamp;
     private LocalDateTime updatedAt;
 
-    private int views;           // 조회수
-    private int likesCount;      // 좋아요 수
-    private boolean liked;       // 좋아요 눌렀는지 여부
-    private long commentsCount;  // 댓글 수
+    private int views;
+    private int likesCount;
+    private boolean liked;
+    private long commentsCount;
 
-    private double rating;       // 평균 별점 (계산값)
-    private int ratingCount;     // 참여자 수
-    private int totalRatingScore;// 별점 총합
+    private double rating;
+    private int ratingCount;
+    private int totalRatingScore;
 
-    private boolean ad;          // 광고 여부
-    private List<String> tags;   // 태그
-    private List<String> images; // 이미지
+    private boolean ad;
+    private List<String> tags;
+    private List<String> images;
 
-    private PlaceResponse place; // 지도 장소
-    private boolean bookmarked;  // 즐겨찾기 여부
+    private PlaceResponse place;
+
+    private boolean bookmarked;
+
+    private boolean isSns;
 }
 
 

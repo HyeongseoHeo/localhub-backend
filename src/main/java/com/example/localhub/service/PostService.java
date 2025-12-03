@@ -384,7 +384,7 @@ public class PostService {
                     .latitude(post.getLatitude())
                     .longitude(post.getLongitude())
                     .build();
-            dto.setPlace(placeDto); // PostResponse에 setPlace 메서드가 있어야 함
+            dto.setPlace(placeDto);
         }
 
         return dto;
