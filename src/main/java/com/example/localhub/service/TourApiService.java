@@ -20,9 +20,8 @@ public class TourApiService {
     @Value("${tour.api.key}")
     private String API_KEY;
 
-    // ★ [추가] API 키를 URL 삽입 전에 수동으로 인코딩하는 헬퍼 메서드
+    // API 키를 URL 삽입 전에 수동으로 인코딩하는 헬퍼 메서드
     private String getEncodedKey() {
-        // API_KEY에 있는 '='이나 '+' 문자를 %3D, %2B 등으로 치환하여 URL 구조가 깨지는 것을 방지
         return UriUtils.encode(API_KEY, StandardCharsets.UTF_8.name());
     }
 
@@ -30,12 +29,12 @@ public class TourApiService {
         RestTemplate restTemplate = new RestTemplate();
 
         try {
-            // ★ keyword도 수동으로 인코딩
+            // keyword도 수동으로 인코딩
             String encodedKeyword = keyword != null && !keyword.isEmpty()
                     ? UriUtils.encode(keyword, StandardCharsets.UTF_8.name())
                     : "";
 
-            // ★ serviceKey도 인코딩
+            // serviceKey도 인코딩
             String encodedServiceKey = getEncodedKey();
 
             // URL 생성 빌더
@@ -47,7 +46,7 @@ public class TourApiService {
                     .queryParam("MobileApp", "LocalHub")
                     .queryParam("_type", "json")
                     .queryParam("arrange", "A")
-                    .queryParam("keyword", encodedKeyword)  // ★ 인코딩된 키워드 사용
+                    .queryParam("keyword",encodedKeyword)
                     .queryParam("contentTypeId", 12);
 
             if (areaCode != null && areaCode > 0) {
@@ -57,7 +56,7 @@ public class TourApiService {
             // 이미 인코딩했으므로 build(false)
             URI uri = builder.build(false).toUri();
 
-            System.out.println("🌐 Tour API URI: " + uri);
+            System.out.println("Tour API URI: " + uri);
 
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
 
@@ -67,13 +66,14 @@ public class TourApiService {
                     response.getResponse().getBody().getItems() != null) {
 
                 List<TourApiResponse.Item> items = response.getResponse().getBody().getItems().getItem();
-                System.out.println("✅ Tour API 결과: " + (items != null ? items.size() : 0) + "개");
+
+                System.out.println("Tour API 결과: " + (items != null ? items.size() : 0) + "개");
                 return items;
             } else {
-                System.out.println("⚠️ Tour API 응답 데이터 없음");
+                System.out.println("Tour API 응답 데이터 없음");
             }
         } catch (Exception e) {
-            System.err.println("❌ Tour API 에러:");
+            System.err.println("Tour API 에러:");
             e.printStackTrace();
         }
 
@@ -94,7 +94,6 @@ public class TourApiService {
                 .queryParam("contentId", contentId)
                 .queryParam("overviewYN", "Y");
 
-        // 인코딩된 키를 사용했으므로, build(false)로 빌드
         URI uri = builder.build(false).toUri();
 
         try {
