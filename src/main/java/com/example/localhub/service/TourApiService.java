@@ -29,12 +29,13 @@ public class TourApiService {
     public List<TourApiResponse.Item> searchTourData(String keyword, Integer areaCode) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // 인코딩된 키 사용
         try {
-            // ★ keyword만 먼저 수동 인코딩
-            String encodedKeyword = UriUtils.encode(keyword, StandardCharsets.UTF_8.name());
+            // ★ keyword도 수동으로 인코딩
+            String encodedKeyword = keyword != null && !keyword.isEmpty()
+                    ? UriUtils.encode(keyword, StandardCharsets.UTF_8.name())
+                    : "";
 
-            // ★ 인코딩된 키와 키워드 사용
+            // ★ serviceKey도 인코딩
             String encodedServiceKey = getEncodedKey();
 
             // URL 생성 빌더
@@ -53,14 +54,12 @@ public class TourApiService {
                 builder.queryParam("areaCode", areaCode);
             }
 
-            // 이미 인코딩된 파라미터들을 사용하므로 build(false)
+            // 이미 인코딩했으므로 build(false)
             URI uri = builder.build(false).toUri();
 
-            System.out.println("🌐 Tour API 호출 URI: " + uri.toString());
+            System.out.println("🌐 Tour API URI: " + uri);
 
             TourApiResponse response = restTemplate.getForObject(uri, TourApiResponse.class);
-
-            System.out.println("✅ Tour API 응답: " + (response != null ? "받음" : "null"));
 
             if (response != null &&
                     response.getResponse() != null &&
@@ -68,7 +67,7 @@ public class TourApiService {
                     response.getResponse().getBody().getItems() != null) {
 
                 List<TourApiResponse.Item> items = response.getResponse().getBody().getItems().getItem();
-                System.out.println("✅ Tour API 결과 개수: " + (items != null ? items.size() : 0));
+                System.out.println("✅ Tour API 결과: " + (items != null ? items.size() : 0) + "개");
                 return items;
             } else {
                 System.out.println("⚠️ Tour API 응답 데이터 없음");
