@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*; // HashMap, List 추가
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +25,7 @@ public class SnsApiController {
 
     private final TourApiService tourApiService;
     private final NaverApiService naverApiService;
+
     private static final Map<Integer, List<String>> EXCLUSION_MAP;
 
     static {
@@ -53,16 +54,21 @@ public class SnsApiController {
     ) {
         List<PostResponse> resultList = new ArrayList<>();
 
-        // "여행" 키워드 자동 포함 로직 (기능 요구사항)
+        // "여행" 키워드 자동 포함 로직
         String baseKeyword = keyword != null && !keyword.isEmpty() ? keyword : "";
         String tourKeyword = String.join(" ", baseKeyword, "여행").trim();
 
         String regionName = convertCodeToName(areaCode);
         String blogQuery = String.join(" ", regionName, tourKeyword).trim();
 
+
         // 공공데이터 (관광지)
+        System.out.println("🔍 관광공사 API 호출 - tourKeyword: " + tourKeyword + ", areaCode: " + areaCode);
         List<TourApiResponse.Item> tourItems = tourApiService.searchTourData(tourKeyword, areaCode);
-        if (tourItems != null) {
+        System.out.println("🔍 관광공사 API 결과: " + (tourItems != null ? tourItems.size() : "null") + "개");
+
+        if (tourItems != null && !tourItems.isEmpty()) {  // ★ !isEmpty() 추가
+            System.out.println("✅ 관광공사 데이터 변환 시작");
             List<PostResponse> tourPosts = tourItems.stream()
                     .map(item -> PostResponse.builder()
                             .id(Long.parseLong(item.getContentid()))
@@ -79,6 +85,9 @@ public class SnsApiController {
                             .build()
                     ).collect(Collectors.toList());
             resultList.addAll(tourPosts);
+            System.out.println("✅ 관광공사 PostResponse 생성 완료: " + tourPosts.size() + "개");
+        } else {
+            System.out.println("⚠️ 관광공사 데이터가 비어있거나 null입니다");
         }
 
         // 네이버 블로그 (제외 필터 적용)
@@ -87,7 +96,6 @@ public class SnsApiController {
         if (blogItems != null && areaCode != null) {
             List<String> exclusionKeywords = EXCLUSION_MAP.getOrDefault(areaCode, Collections.emptyList());
 
-            // ★★★ [핵심: 제외 필터링] ★★★
             blogItems = blogItems.stream()
                     .filter(item -> exclusionKeywords.stream().noneMatch(
                             exKeyword -> item.getTitle().contains(exKeyword) || item.getDescription().contains(exKeyword)
@@ -124,13 +132,11 @@ public class SnsApiController {
             resultList.addAll(blogPosts);
         }
 
-        // 두 리스트를 랜덤하게 섞기
         Collections.shuffle(resultList);
 
         return ResponseEntity.ok(resultList);
     }
 
-    // 숫자 코드를 지역 이름으로 바꾸는 헬퍼 메서드 (기존 로직 유지)
     private String convertCodeToName(Integer code) {
         if (code == null) return "";
         switch (code) {
