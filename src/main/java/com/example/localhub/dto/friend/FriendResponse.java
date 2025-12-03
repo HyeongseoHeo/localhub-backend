@@ -1,23 +1,30 @@
 package com.example.localhub.dto.friend;
 
 import com.example.localhub.domain.member.Member;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
-
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class FriendResponse {
-    private Long id;          // Friendship ID (요청 ID) 또는 Member ID
-    private String name;      // 친구 이름
-    private String email;     // 친구 이메일
-    private String profileImage; // 프로필 이미지 URL
+
+    private Long friendId;
+    private String name;
+    private String email;
+    private String profileImage;
+    private String role;
 
     // Member 엔티티를 DTO로 변환하는 정적 메서드
-    public static FriendResponse from(Member member, Long friendshipId) {
+    public static FriendResponse from(Member member) {
         return FriendResponse.builder()
-                .id(friendshipId != null ? friendshipId : member.getId())
+                .friendId(member.getId())
                 .name(member.getNickname())
                 .email(member.getEmail())
+                .role(member.getRole().name())
                 .build();
     }
 }

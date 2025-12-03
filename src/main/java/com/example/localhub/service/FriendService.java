@@ -56,7 +56,7 @@ public class FriendService {
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
         return friendshipRepository.findAllByReceiverAndStatus(user, FriendshipStatus.PENDING).stream()
-                .map(f -> FriendResponse.from(f.getRequester(), f.getId()))
+                .map(f -> FriendResponse.from(f.getRequester()))
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +70,7 @@ public class FriendService {
         return friendshipRepository.findAllFriends(user).stream()
                 .map(f -> {
                     Member friend = f.getRequester().equals(user) ? f.getReceiver() : f.getRequester();
-                    return FriendResponse.from(friend, f.getId());
+                    return FriendResponse.from(friend);
                 })
                 .collect(Collectors.toList());
     }

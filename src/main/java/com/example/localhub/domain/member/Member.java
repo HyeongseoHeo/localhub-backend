@@ -4,6 +4,7 @@ import com.example.localhub.domain.board.Comment;
 import com.example.localhub.domain.board.Post;
 import com.example.localhub.domain.board.PostLike;
 import com.example.localhub.domain.board.PostRating;
+import com.example.localhub.domain.friend.Friendship;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,8 +46,6 @@ public class Member {
         this.cleanbotOn = !this.cleanbotOn;
     }
 
-    // 👇 [여기부터 추가] 회원이 삭제될 때 같이 삭제될 데이터들 설정
-
     // 1. 내가 쓴 게시글 삭제
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default // Builder 패턴 쓸 때 리스트 초기화 방지
@@ -66,6 +65,16 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @Builder.Default
     private List<PostRating> ratings = new ArrayList<>();
+
+    // 5. 내가 요청한 친구 관계 삭제
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    private List<Friendship> sentFriendships = new ArrayList<>();
+
+    // 6. 내가 받은 친구 관계 삭제
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Builder.Default
+    private List<Friendship> receivedFriendships = new ArrayList<>();
 }
 
 
