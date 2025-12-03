@@ -84,7 +84,7 @@ public class Post {
     // SNS
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "is_sns", nullable = false)
     private boolean isSns = false;
 
     // 이미지 URL 리스트
