@@ -82,6 +82,7 @@ public class FriendService {
 
         if (accept) {
             friendship.acceptFriendship();
+            friendshipRepository.save(friendship);
         } else {
             friendshipRepository.delete(friendship);
         }
