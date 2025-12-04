@@ -50,13 +50,11 @@ public class FriendService {
     // 2. 받은 친구 요청 목록 조회
     @Transactional(readOnly = true)
     public List<FriendResponse> getFriendRequests(String userEmail) {
-
-        // 에러 메시지 추가
         Member user = memberRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
 
         return friendshipRepository.findAllByReceiverAndStatus(user, FriendshipStatus.PENDING).stream()
-                .map(f -> FriendResponse.from(f.getRequester()))
+                .map(FriendResponse::fromRequest)
                 .collect(Collectors.toList());
     }
 
