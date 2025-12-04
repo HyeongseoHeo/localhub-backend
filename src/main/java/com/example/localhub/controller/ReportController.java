@@ -23,7 +23,6 @@ public class ReportController {
                 req.getReason(),
                 req.getContent()
         );
-        // 성공 시 200 OK 응답을 반환
         return ResponseEntity.ok().build();
     }
 }

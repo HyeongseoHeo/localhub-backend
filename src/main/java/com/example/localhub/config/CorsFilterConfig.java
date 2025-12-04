@@ -13,7 +13,7 @@ import java.util.List;
 @Configuration
 public class CorsFilterConfig {
 
-    // 아까 WebConfig에 있던 CORS 규칙을 그대로 가져옵니다.
+    // 아까 WebConfig에 있던 CORS 규칙을 그대로
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -29,10 +29,9 @@ public class CorsFilterConfig {
         ));
 
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("*")); // 모든 헤더 허용
-        config.setExposedHeaders(Arrays.asList("Authorization")); // JWT 토큰 노출을 위해 추가 권장
-
-        source.registerCorsConfiguration("/**", config); // 모든 경로에 적용
+        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setExposedHeaders(Arrays.asList("Authorization"));
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

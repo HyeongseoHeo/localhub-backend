@@ -4,8 +4,10 @@ import com.example.localhub.domain.friend.Friendship;
 import com.example.localhub.domain.friend.FriendshipStatus;
 import com.example.localhub.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,4 +23,8 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     // 중복 요청 방지용 (A와 B 사이에 관계가 존재하는지 확인)
     boolean existsByRequesterAndReceiver(Member requester, Member receiver);
     boolean existsByReceiverAndRequester(Member requester, Member receiver);
+
+    @Transactional
+    @Modifying
+    void deleteByRequesterAndReceiverAndStatus(Member requester, Member receiver, FriendshipStatus status);
 }

@@ -22,11 +22,11 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 👇 [추가] 신고 대상 타입 ("POST" 또는 "COMMENT")
+    // 신고 대상 타입
     @Column(nullable = false)
     private String targetType;
 
-    // 👇 [추가] 신고 대상 ID (게시글 ID 또는 댓글 ID)
+    // 신고 대상 ID
     @Column(nullable = false)
     private Long targetId;
 
@@ -39,7 +39,7 @@ public class Report {
     private ReportReason reason;
 
     @Column(columnDefinition = "TEXT")
-    private String detail; // 기타 등 추가 설명 (기존 코드의 'detail' 필드를 재사용)
+    private String detail;
 
     private LocalDateTime createdAt;
 

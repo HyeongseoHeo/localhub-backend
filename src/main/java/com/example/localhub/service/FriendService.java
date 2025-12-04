@@ -89,6 +89,19 @@ public class FriendService {
 
     // 5. 친구 삭제
     public void deleteFriend(Long friendId, String userEmail) {
-        friendshipRepository.deleteById(friendId);
+
+        Member user = memberRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("로그인 된 사용자를 찾을 수 없습니다."));
+
+        Member friend = memberRepository.findById(friendId)
+                .orElseThrow(() -> new IllegalArgumentException("친구를 찾을 수 없습니다."));
+
+        friendshipRepository.deleteByRequesterAndReceiverAndStatus(
+                user, friend, FriendshipStatus.ACCEPTED
+        );
+
+        friendshipRepository.deleteByRequesterAndReceiverAndStatus(
+                friend, user, FriendshipStatus.ACCEPTED
+        );
     }
 }

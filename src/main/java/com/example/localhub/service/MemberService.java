@@ -37,6 +37,7 @@ public class MemberService {
             throw new RuntimeException("비밀번호 형식이 올바르지 않습니다. (소문자/숫자/특수문자 포함, 8~49자)");
         }
 
+        // 회원가입시 암호화 -> Spring Security의 BCryptPasswordEncoder가 동작해서 비밀번호가 단방향 해시 처리
         String encodedPassword = passwordEncoder.encode(password);
 
         // 이메일 도메인으로 관계자 여부 판단

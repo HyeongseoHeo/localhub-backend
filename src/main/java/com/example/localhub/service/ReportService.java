@@ -21,11 +21,8 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository; // 👈 댓글 검증을 위해 주입
+    private final CommentRepository commentRepository;
 
-    /**
-     * [최종] 신고 접수 로직 (게시글 및 댓글 모두 처리)
-     */
     public void createReport(Long reporterId, String targetType, Long targetId, String reason, String content) {
 
         // 1. 신고자 존재 확인
@@ -66,10 +63,6 @@ public class ReportService {
         }
     }
 
-
-    /**
-     * [재사용] 신고 사유 매핑 로직
-     */
     private ReportReason mapReason(String reason) {
         return switch (reason) {
             case "스팸 또는 광고" -> ReportReason.SPAM_AD;
